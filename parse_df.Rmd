@@ -1,0 +1,263 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+```{r}
+# Load packages
+library(tidyverse)
+library(magrittr)
+library(stringr)
+library(xml2)
+library(XML)
+
+```
+
+**FAILURE TO APPEAR**
+Purpose: to determine 
+```{r}
+eventsdescrp_df<-read.csv("Data tables/eventsdescrp_df1.csv")%>%
+                    bind_rows(.,read.csv("Data tables/eventsdescrp_df2.csv"))%>%
+                    bind_rows(.,read.csv("Data tables/eventsdescrp_df3.csv"))%>%
+                    bind_rows(.,read.csv("Data tables/eventsdescrp_df4.csv"))
+
+
+eventsdescrp_df$Description<-as.character(eventsdescrp_df$Description)
+View(eventsdescrp_df)
+```
+
+idea: use group by person id, group by case number, call function 
+Checked all descriptions in which "appear" shows up: 
+appear
+<dbl>
+Description
+<chr>
+1	File Notice Of Appearance		
+1	D6 Failure To Appear		
+1	File Waiver Of Appearance		
+1	File Notice to Appear Affidavit		
+1	File Certificate Of Non-Appearance Of Witness		
+1	File Consent Of Appearance		
+1	File Defendant's Consent For Appearance		
+1	Notice To Appear		
+1	SAO Approve Cert Legal Intern Appear For State		
+1	File Order Granting Def Motion To Waive Appearance		
+1-10 of 10 rows
+```{r}
+fail_to_appear<-eventsdescrp_df%>%
+                   mutate(fail_appeared=if_else(str_detect(Description,coll("D6 Failure To Appear",T,ignore_case=T))
+                                                ==T,1,0)) %>%
+                  # mutate(appear=if_else(str_detect(Description,coll("appear",T,ignore_case=T))
+                  #                               ==T,1,0)) %>%
+                  
+                  select(person_id,EventDate,case_num,Description,fail_appeared)
+View(fail_to_appear)
+
+# unique
+# fail_to_appear%>%
+#     select(appear,Description)%>%
+#     filter(appear!=0)%>%
+#     distinct()
+  
+
+```
+
+
+```{r}
+write.csv(fail_to_appear,"Data tables/fail_to_appear.csv")
+```
+
+**CONVICTIONS**
+
+Parsed the XML strings incorrectly when I queried the data from the web API, so I will reparse them here by reading the strings from my hard drive.
+```{r}
+# charge_parser<-function(acharge,case.number,person.id){
+#   disp_frame<-acharge$DispositionList%>%
+#               # print()%>%
+#               unlist()%>%
+#               # print()%>%
+#               matrix(nrow=1,byrow=T)%>%
+#               data.frame(stringsAsFactors=F)
+#   
+#   disp_frame<-mutate(disp_frame,case_number=case.number,
+#               person_id=person.id,
+#               OffenseDate=acharge$Offense_Date,
+#               Charge=acharge$Charge)
+# }
+charge_parser<-function(acharge,case.number,person.id,isNA){
+   # print(acharge)
+  # print(case.number)
+  # print(person.id)
+  # charge_with_null<<-acharge$DispositionList
+  acharge<<-acharge
+  if(is.null(acharge$DispositionList)){
+    isNA<<-TRUE
+    print("isnull")
+    return(NA)
+  }
+  
+  disp_frame<-acharge$DispositionList%>%
+               # print()%>%
+              unlist()%>%
+  #             # print()%>%
+              matrix(nrow=1,byrow=T)%>%
+
+              data.frame(stringsAsFactors=F)
+
+  disp_frame<-mutate(disp_frame,case_number=case.number,
+              person_id=person.id,
+              OffenseDate=acharge$Offense_Date,
+              Charge=acharge$Charge)
+}
+
+#purpose: if isNA got tripped, then return the rows that are not zero
+removeNA_matrixCol<-function(matrix,isNA){
+  if(isNA==T){
+    print("isNA==T")
+    return(matrix[colSums(!is.na(matrix))>0])
+  }
+  return(matrix)
+}
+
+
+reparse_from_system<-function(sample_row){
+  pb$tick()$print()
+
+  person.id<-sample_row$person_id
+  case.number<-sample_row$case_number
+  isNA<<-FALSE
+  
+  filename<-paste0("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/disps_data/",case.number,"crim_dispositions.txt_xml")
+
+  xmlList<-filename%>%
+            read_xml()%>%
+            xmlTreeParse%>%
+            use_series(doc)%>%
+            use_series(children)%>%
+            use_series(string)%>%
+            xmlToList%>%
+            xmlParse%>%
+            xmlToList
+  
+  # xml_df<-sapply(xmlList[-1],charge_parser,case.number,person.id)%>%
+  #         t()%>%
+  #         as.data.frame(row.names=NULL)
+  
+  xml_df<<-sapply(xmlList[-1],charge_parser,case.number,person.id,isNA)%>%
+            t()%>%
+            
+            removeNA_matrixCol(.,isNA )%>%
+
+            as_data_frame(row.names=NULL,stringsAsFactors=F)%>% #problem: column types are list
+            map_df(unlist) 
+  #this function will apply the unlist function to each column, so that each column is now a character vector as desired
+  #was experiencing issue where a few dataframes produced by this function had column type character, but the vast majority had column type list, so couldn't rbind it. 
+            # lapply(as.character)%>% #issue: screws up column names
+            # as_data_frame()
+
+  
+  print(xml_df)
+  # xml_df<-xml_df%>%
+  #         lapply(as.character)%>%
+  #         as_data_frame()#prospective code to fix binding problem
+
+  return(xml_df)
+}
+
+safe_reparse<-safely(reparse_from_system)
+
+wrapper_reparse<-function(sample_row){
+  # options(error=recover)
+  # res<-safe_reparse(sample_row)
+  res<-reparse_from_system(sample_row)
+
+  # if(is.null(res$result)){
+  if(is.null(res)){
+
+    print(res$error)
+    print(sample_row$case_number)
+    return()
+  }
+  # return(res$result)
+  return(res)
+}
+
+```
+
+
+
+```{r}
+
+loopdf<-read.csv(file="C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/loopdf.csv")
+sample<-slice(loopdf,1:50)
+
+sample$case_number<-as.character(sample$case_number)
+sample$person_id<-as.numeric(sample$person_id)
+df_as_list<-sample%>%
+              split(seq(nrow(.)))%>%
+              lapply(as.vector)
+
+```
+
+
+```{r}
+pb <- progress_estimated(length(sample$case_number))
+dispositions_df_orig<-map_dfr(df_as_list, ~wrapper_reparse(.x))
+# dispositions_df<-dispositions_df_orig
+
+```
+
+
+```{r}
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables")
+#so that writeToSystem writes to correct place
+
+dispositions_df<-rename(dispositions_df, JudgementDate=X1,Description=X2)
+dispositions_df$JudgementDate<-as.Date(as.character(dispositions_df$JudgementDate),format = "%m/%d/%Y")
+dispositions_df$Description<-as.character(dispositions_df$Description)
+dispositions_df$case_number<-as.character(dispositions_df$case_number)
+dispositions_df$OffenseDate<-as.Date(as.character(dispositions_df$OffenseDate),format = "%m/%d/%Y")
+dispositions_df$Charge<-as.numeric(dispositions_df$Charge)
+dispositions_df$X3<-as.character(dispositions_df$X3)
+
+write.csv(dispositions_df,"C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/corrected_disp_df.csv")
+
+```
+
+_______________________________________________________________________
+
+Parsing csv file 
+```{r}
+disp_df<-read.csv("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/corrected_disp_df.csv")
+#unique(select(disp_df,X3))
+#View(disp_df)
+
+```
+
+
+```{r}
+convictions<-disp_df%>%
+             mutate(convicted=if_else(str_detect(
+             Description,coll("convicted",T,ignore_case=T))
+                                      ==T,1,0))
+                  
+View(head(convictions))
+                
+```
+
+
+
+```{r}
+write.csv(convictions,"C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/convicted_from_disps.csv")
+
+```
+
+

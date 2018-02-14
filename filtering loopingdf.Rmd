@@ -1,0 +1,138 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+```{r}
+library(stringr)
+library(tidyverse)
+```
+
+
+```{r}
+# Connect to the database
+db <- src_sqlite("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/crim-recid-code/compas-analysis/compas.db", create = TRUE)
+
+# List all the tables
+table_names <- src_tbls(db)
+table_names
+```
+
+```{r}
+casearrest_df <- tbl(db,"casearrest")
+charge_df <- tbl(db,"charge")
+compas_df <- tbl(db,"compas")
+jailhistory_df <-tbl(db,"jailhistory")
+prisonhistory_df <-tbl(db,"prisonhistory")
+people_df<-tbl(db,"people")
+```
+
+Creating a new df from a subset of compas_df,chargenew,peopleneew
+Rows in df: person_id, screening_date, case_number, date_charge_filed, dob
+Converted to dataframe
+n(df)
+<int>
+489036				
+1 row
+
+```{r}
+df=select(compas_df,person_id,screening_date)
+chargenew=select(charge_df,person_id,case_number,date_charge_filed)
+peoplenew=rename(select(people_df, id, dob), person_id=id)
+
+df<-df%>%
+          left_join(chargenew, by="person_id")%>%
+          left_join(peoplenew, by="person_id")%>%
+          as_data_frame()
+
+summarise(df,n())
+#loopdf=left_join(loopdf, chargenew, by="person_id")
+#consider adding the variables, charge_number and charge
+#will need charge number later so I can do dispositions
+```
+
+
+
+filtering criteria
+1) remove people with compas score screening date>30 days from any crime date 
+nrow(df): [1] 489036
+nrow(df1): [1] 439359
+```{r}
+nrow(df)
+df$screening_date=as.Date(df$screening_date)
+df$date_charge_filed=as.Date(df$date_charge_filed)
+
+compas_30<-df%>%
+        mutate(days_from_compas=(screening_date-date_charge_filed))%>%
+        mutate(within_30=(days_from_compas<=30))%>%
+        group_by(person_id)%>%
+           summarize(valid_screen_date=(sum(within_30)>0)) #Boolean, number of cases within 30 days for each person is >0
+
+#the removed cases
+filter(compas_30, valid_screen_date==F)
+
+df1<-df%>%
+      left_join(compas_30, by="person_id")%>%
+      filter(valid_screen_date==T)
+
+nrow(df1)
+
+
+```
+
+2) check if any people have charge date <= dob
+Result: the only cases which satisfy this are charge date==dob; only 36 rows satisfied this
+Decided to retain these rows (can always remove later)
+
+nrow(df1)[1] 439359
+nrow(df2)[1] 439323
+```{r}
+#nrow(df1)
+#invalid_charge_date<-filter(df1, !((date_charge_filed>dob) | is.na(date_charge_filed) | is.na(dob)))
+#invalid_charge_date #the cases that were removed; all have dob=date_charge_filed
+
+#df2<-filter(df1, (date_charge_filed>dob) | is.na(date_charge_filed) | is.na(dob))
+#nrow(df2)
+
+```
+
+
+3) check number of unique cases in the dataset, vs #unique cases per person
+Result: found a discrepancy of approximately 2; not worth removing overlap cases
+nrow(unique_cases_df1):[1] 72747
+nrow(unique_by_person):[1] 72749
+```{r}
+unique_cases_df1<-df1%>%
+                    select(case_number)%>%
+                    distinct()%>%
+                    nrow()
+
+loopdf<-df1%>%
+          select(person_id,case_number)%>%
+          distinct()
+  #check work using group by
+
+  #        group_by(person_id)%>%
+   #         summarise(n_distinctcases=n_distinct(case_number))
+loopdf
+#sum(loopdf$n_distinctcases) #gives same result as original method
+unique_by_person<-nrow(loopdf) 
+
+unique_cases_df1
+unique_by_person
+```
+
+
+Write df to working directory
+```{r}
+#write.csv(loopdf, "loopdf.csv") 
+```
+

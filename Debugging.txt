@@ -1,0 +1,134 @@
+Friday, 1/5/18: parsing XML 
+output of xmlTreeParse
+$doc
+$file
+[1] "<buffer>"
+
+$version
+[1] "1.0"
+
+$children
+$children$string
+<string>&lt;CriminalDispositions&gt;&lt;Case_Number&gt;09083797TI30A&lt;/Case_Number&gt;&lt;ChargeDispositionList&gt;&lt;Charge&gt;1&lt;/Charge&gt;&lt;Offense_Date&gt;08/11/2009&lt;/Offense_Date&gt;&lt;PleaList&gt;&lt;Date&gt;01/08/2010&lt;/Date&gt;&lt;Type_Description&gt;Change of Plea-Nolo Contendere&lt;/Type_Description&gt;&lt;Amended_Reason&gt;Change of Plea,&lt;/Amended_Reason&gt;&lt;/PleaList&gt;&lt;PleaList&gt;&lt;Date&gt;09/17/2009&lt;/Date&gt;&lt;Type_Description&gt;Written Plea Not Guilty Infraction&lt;/Type_Description&gt;&lt;Amended_Reason /&gt;&lt;/PleaList&gt;&lt;DispositionList&gt;&lt;Date&gt;01/08/2010&lt;/Date&gt;&lt;Description&gt;Convicted by Plea - Adjudicated&lt;/Description&gt;&lt;Amended_Reason /&gt;&lt;/DispositionList&gt;&lt;SentenceList&gt;&lt;Date&gt;01/08/2010&lt;/Date&gt;&lt;Type_Description&gt;Sentence&lt;/Type_Description&gt;&lt;Judge&gt;Diioia - HO, Brenda&lt;/Judge&gt;&lt;Amended_Reason /&gt;&lt;/SentenceList&gt;&lt;/ChargeDispositionList&gt;&lt;/Crimin... <truncated>
+
+
+attr(,"class")
+[1] "XMLDocumentContent"
+
+$dtd
+$external
+NULL
+
+$internal
+NULL
+
+attr(,"class")
+[1] "DTDList"
+
+attr(,"class")
+[1] "XMLDocument"        
+[2] "XMLAbstractDocument"
+_________________________________________________
+Friday, 1/5/18: Developing json_as_df, for crim dispositions
+disp<-getJSON(casenum,request)
+filename=writeToSystem(disp,casenum,request)
+json_string<-fromJSON(txt=filename)
+
+json_df<-json_string$ChargeDispositionLists
+dispo_df<-select(json_df,Charge,Offense_Date,DispositionList)
+disps<-json_df$DispositionList
+View(disps)
+#listolists<-select(json_df,DispositionList,PleaList,SentenceList)
+listelem <- disps%>%
+                do.call(rbind.data.frame, .)%>%
+                mutate(case_num=json_string$Case_Number,
+                       #person_id=,
+                       OffenseDate=json_df$Offense_Date,
+                       Charge=json_df$Charge)
+View(listelem)
+
+______________________________________
+data import testing code (Thursday, 1/4/18)
+Test map_dfr
+```{r}
+#takes mpg as input and returns a df
+testiris<-select(head(iris),Sepal.Length, Sepal.Width)
+self<-function(testlist){
+  print("entered function")
+
+  mpg<-testlist[1]$mpg
+  print(mpg)
+  cyl<-testlist[2]$cyl
+  result<-testiris%>%
+             multiply_by(mpg)%>%
+             mutate(multbympg=mpg,name=cyl)
+  return (result)
+}
+#testlist=as.list(mtcars)
+testlist<-mtcars%>%
+              head()%>%
+              split(seq(nrow(.)))
+#testlist <- split(mtcars, seq(nrow(mtcars)))
+
+testcars<-map_dfr(testlist,~self(.x)) #finding: mapdfr takes a list as input, or coerces df coumns to list
+#should return df with the mpg*testiris
+#Expected length: iris length * mtcars length; 6*32=192
+```
+Test map_dfr with df_as_list
+```{r}
+testiris<-select(head(iris),Sepal.Length, Sepal.Width)
+self<-function(sample_row){
+  person.id<-sample_row$person_id
+  case.number<-sample_row$case_number
+  
+#  print("entered function")
+  result<-testiris%>%
+             multiply_by(5)%>%
+             mutate(persid=person.id,casenum=case.number)
+  return (result)
+}
+
+safe_self<-safely(self)
+
+wrapper<-function(sample_row){
+#  person.id<-sample_row$person_id
+ # case.number<-sample_row$case_number
+ # print(sample_row)
+  res<-safe_self(sample_row)
+#  print(res$result)
+  if(is.null(res$result)){
+  #  print(person.id, case.number)
+    print("is null")
+    return()
+  }
+  print("passed")
+  return(res$result)
+}
+
+testmap<-map_dfr(df_with_flaw, ~wrapper(.x))
+
+#QUestion: how does map_dfr deal with 1 null? 
+Answer: deals well, returns anyways
+df_with_flaw<-df_as_list
+df_with_flaw$`1`$case_number=NULL
+sample_row<-df_as_list$`2`
+testresult<-safe_self(sample_row)
+```
+
+Test processing with jsonlite
+Findings: json_fromfile is the same as json_fromurl
+Either way i do it, should probably do the http request just so I can check status
+```{r}
+#test with reading from file
+json_fromfile<-fromJSON(txt=filename)
+#a list dfhybrid
+json_df<-json_fromfile$EventList #a dataframe
+names(json_df$PartyList[1])
+
+# #test with reading from url
+# request_type="events_and_documents"
+# casenumber<-"16000333CF10A"
+# json_fromurl<-fromJSON(txt=paste0(url_broward,'case/',casenumber,'/',request_type,'.json?auth_key=',key))
+#just need the description of each event, don't need anything else
+#from command print(eventlist$EventList): each element of eventlist$EventList has $EventDate, $Description, $EventAmount, $AdditionalText, $PartyList, $Party2List, $CauseList, 
+#$EventDocumentList, $EventDocumentList$Name, $EventDocumentList$Page, $eventDocument$Confidential

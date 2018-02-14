@@ -1,0 +1,402 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# Load packages
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(xml2)
+library(XML)
+library(magrittr)
+```
+
+Evdocs failed 16 times due to [500] error on first 10,000 requests 
+18 failures on  10,000-20,000
+46 failures on 20,000-40,000
+66 failures on 40,000-80,000
+Broward county username/passwork: clw74
+Duke@1234
+
+```{r}
+loopdf<-read.csv(file="Data tables/loopdf.csv") 
+#loopdf<-select(loopdf, person_id, case_number)
+
+sample<-slice(loopdf,40000:n())
+#sample<-loopdf
+sample$case_number<-as.character(sample$case_number)
+sample$person_id<-as.numeric(sample$person_id)
+df_as_list<-sample%>%
+              split(seq(nrow(.)))%>%
+              lapply(as.vector)
+```
+
+
+Querying data for events and documents (used for failure to appear)
+PROBLEM: find case with lots of charges, see if 2nd page is generated 
+```{r}
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/events_docs_data")
+#so that writeToSystem writes to correct place
+
+pb <- progress_estimated(length(sample$case_number))
+eventsdocs_df<-map_dfr(df_as_list, ~wrapper(.x,"events_and_documents","json"))
+
+```
+
+```{r}
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/events_docs_data")
+#so that writeToSystem writes to correct place
+
+eventsdescrp_df<-select(eventsdocs_df, person_id,case_num,EventDate,Description,EventAmount,AdditionalText)
+write.csv(eventsdescrp_df,"sample_eventsdescrp_df4.csv")
+ rm(eventsdescrp_df)
+ rm(eventsdocs_df)
+
+```
+
+
+
+
+
+
+
+Querying data for dispositions (for convictions)
+```{r}
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/disps_data")
+#so that writeToSystem writes to correct place
+
+pb <- progress_estimated(length(sample$case_number))
+dispositions_df<-map_dfr(df_as_list, ~wrapper(.x,"crim_dispositions","xml"))
+
+```
+
+```{r}
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/disps_data")
+#so that writeToSystem writes to correct place
+
+dispositions_df<-rename(dispositions_df, JudgementDate=X1,Description=X2)
+write.csv(dispositions_df,"final_disp_df.csv")
+rm(dispositions_df)
+```
+
+
+
+
+**FUNCTIONS**
+*wrapper()* uses all the functions specified below to make call to Broward Clerk's Office site, write the data string to the system, and process it into a dataframe. Wrapped the safely 'version' of api_call to process the list result (returned by safe_api_call) into a dataframe. 
+ 
+```{r}
+api_call<-function(sample_row,request,data_type){
+  options(error=recover)
+  pb$tick()$print()
+  
+#  Sys.sleep(sample(seq(0.5, 2.5, 0.5), 1)) #time delay between calls
+  
+  person.id<-sample_row$person_id
+  case.number<-sample_row$case_number
+  data<-get_data(case.number ,request,data_type)
+  filename<-writeToSystem(data,case.number,paste(request,".txt",sep=""),data_type) #saves file to system using casenum and request type in the name; returns filename
+  
+  if (data_type=="json"){
+    json_fromfile<-fromJSON(txt=filename)
+   #a list df hybrid
+    json_df<-json_as_df(json_fromfile,case.number,person.id)
+    return(json_df)
+  }
+  else if (data_type=="xml"){
+    xml_df<-xml_as_df(filename,case.number,person.id)
+  }
+}
+
+safe_api_call<-safely(api_call)
+
+wrapper<-function(sample_row,request,data_type){
+  options(error=recover)
+  res<-safe_api_call(sample_row,request,data_type)
+  if(is.null(res$result)){
+    return()
+  }
+  return(res$result)
+}
+
+```
+
+*get_data* returns a json/xml string from the Broward Clerk's website through HTTP GET request
+*writeToSystem* takes a json HTTP response and saves it as .txt file 
+a "void" function, but prints the filename
+*data_as_df* processes json/xml string into a dataframe 
+(different processing needed for events_docs and crim_dispositions)
+*charge_parser* is a helper function for xml_as_df
+
+```{r}
+get_data<-function(casenumber,request_type, data_type){
+  url_broward<-"https://api.browardclerk.org/api/"
+  key<-"Lo5Mt6EEJIwDILvpusItyvDntLsLqMwuMGzrvLFDsKzDsnypquI3JD6CLKoopLxwvnypttCKEqGnGs6sF9EKFnr21qD4MJFnvEwovDwqtp73nzCtyEGzJrsy8K4rsD9tFEGvKp8pspEyxrGw0oxtEF2HFoD1KrHGGExttDHJCF2yz1zoDuDxnpxnuwsJo8rK7H1GspGGIxxFztDLutDyqHGDrvF3sHJsyxwzLCwDJnMCnMw3CMsHvzrLEK"
+  url=paste0(url_broward,'case/',casenumber,'/',request_type,'.',data_type,'?auth_key=',key)
+#  print(url)
+  eventsdocs<-RETRY("GET", url,times=5)
+    #retries until http_error (boolean) returns false; true if status code is 400+
+    #retries max of 5x; 1 sec pauses between tries
+  return(eventsdocs) #r automatically returns last line but we'll explicitly return this here
+}
+
+writeToSystem<-function(web_response,casenumber, filetype,data_type){
+  filename=paste(casenumber,filetype,"_",data_type, sep="")
+  raw<-content(web_response,"raw")
+  writeBin(raw,filename)
+  return(filename)
+}
+
+json_as_df<-function(data_fromfile,case.number,person.id){
+     json_df<-data_fromfile%>%
+              use_series(EventList)%>%  #the magrittr version of $ operator
+              mutate(case_num=case.number, person_id=person.id)
+     return(json_df)
+}
+
+charge_parser<-function(acharge){
+  acharge%>%
+    use_series(DispositionList)%>%
+    unlist()%>%
+    matrix(nrow=1,byrow=T)%>%
+    data.frame(stringsAsFactors=F)%>%
+    mutate(case_number=xmlList$Case_Number,
+          OffenseDate=acharge$Offense_Date,
+          Charge=acharge$Charge)
+}
+
+xml_as_df<-function(filename,case.number,person.id){
+  xmlList<-filename%>%
+            read_xml()%>%
+            xmlTreeParse%>%
+            use_series(doc)%>%
+            use_series(children)%>%
+            use_series(string)%>%
+            xmlToList%>%
+            xmlParse%>%
+            xmlToList
+
+  xml_df<-xmlList[-1]%>%
+            sapply(charge_parser)%>%
+            t()%>%
+            as.data.frame(row.names=F)
+}
+```
+
+
+
+**TESTING CODE**
+Test call to api
+```{r}
+pb <- progress_estimated(length(1))
+
+# casenum<-"09083797TI30A"
+#personid<-1
+# request="crim_dispositions"
+#disp<-getJSON(casenum,request)
+#writeToSystem(eventsdocs,casenum,"eventsdocs.txt")
+#row<-slice(sample,1:1)
+
+testdf<-api_call(row ,request)
+
+#result<-json_as_df(json_string, request,casenum,personid)
+```
+Test map_dfr
+```{r}
+#takes mpg as input and returns a df
+testiris<-select(head(iris),Sepal.Length, Sepal.Width)
+self<-function(testlist){
+  print("entered function")
+
+  mpg<-testlist[1]$mpg
+  print(mpg)
+  cyl<-testlist[2]$cyl
+  result<-testiris%>%
+             multiply_by(mpg)%>%
+             mutate(multbympg=mpg,name=cyl)
+  return (result)
+}
+#testlist=as.list(mtcars)
+testlist<-mtcars%>%
+              head()%>%
+              split(seq(nrow(.)))
+#testlist <- split(mtcars, seq(nrow(mtcars)))
+
+testcars<-map_dfr(testlist,~self(.x)) #finding: mapdfr takes a list as input, or coerces df coumns to list
+#should return df with the mpg*testiris
+#Expected length: iris length * mtcars length; 6*32=192
+```
+Test map_dfr with df_as_list
+```{r}
+testiris<-select(head(iris),Sepal.Length, Sepal.Width)
+self<-function(sample_row){
+  person.id<-sample_row$person_id
+  case.number<-sample_row$case_number
+  
+#  print("entered function")
+  result<-testiris%>%
+             multiply_by(5)%>%
+             mutate(persid=person.id,casenum=case.number)
+  return (result)
+}
+
+safe_self<-safely(self)
+
+wrapper<-function(sample_row){
+  res<-safe_self(sample_row)
+  if(is.null(res$result)){
+    print("is null")
+    return()
+  }
+  print("passed")
+  return(res$result)
+}
+
+testmap<-map_dfr(df_with_flaw, ~wrapper(.x))
+
+#QUestion: how does map_dfr deal with 1 null? 
+#Answer: deals well, returns anyways
+df_with_flaw<-df_as_list
+df_with_flaw$`1`$case_number=NULL
+sample_row<-df_as_list$`2`
+testresult<-safe_self(sample_row)
+```
+
+Test processing events_docs with jsonlite
+Findings: json_fromfile is the same as json_fromurl
+Either way i do it, should probably do the http request just so I can check status
+```{r}
+#test with reading from file
+json_fromfile<-fromJSON(txt=filename)
+#a list dfhybrid
+json_df<-json_fromfile$EventList #a dataframe
+names(json_df$PartyList[1])
+
+# #test with reading from url
+# request_type="events_and_documents"
+# casenumber<-"16000333CF10A"
+# json_fromurl<-fromJSON(txt=paste0(url_broward,'case/',casenumber,'/',request_type,'.json?auth_key=',key))
+#just need the description of each event, don't need anything else
+#from command print(eventlist$EventList): each element of eventlist$EventList has $EventDate, $Description, $EventAmount, $AdditionalText, $PartyList, $Party2List, $CauseList, 
+#$EventDocumentList, $EventDocumentList$Name, $EventDocumentList$Page, $eventDocument$Confidential
+
+```
+Test processing crim_dispositions with jsonlite package
+```{r}
+disp<-get_data(casenum,request,"json")
+filename=writeToSystem(disp,casenum,request,"json")
+json_string<-fromJSON(txt=filename)
+
+json_df<-json_string$ChargeDispositionList
+dispo_df<-select(json_df,Charge,Offense_Date,DispositionList)
+disps<-json_df$DispositionList
+View(disps)
+#listolists<-select(json_df,DispositionList,PleaList,SentenceList)
+listelem <- disps%>%
+                do.call(rbind.data.frame, .)%>%
+                mutate(case_num=json_string$Case_Number,
+                       #person_id=,
+                       OffenseDate=json_df$Offense_Date,
+                       Charge=json_df$Charge)
+View(listelem)
+
+```
+
+Test processing crim_dispositions with xml2 and XML packages
+Cases for person_id==4: 
+[1] "09024308TI20A" "09057909TI20A" "11020953CF10A" "12017635CF10A" "12019341TI20A" "12074993TI30A"
+ [7] "13002653MM10A" "13004375TC10A" "13005330CF10A" "13010663CF10A" "13011511MM10A" "14012120TC10A"
+[13] "16000322MM10A" "16000754MM20A"
+
+
+```{r}
+# request="crim_dispositions"
+# disp<-get_data(casenum, request,"xml" )
+# filename<-writeToSystem(disp,casenum,request,"xml")
+
+person.id=4
+# case.number="13000570CF10A" #this case has NULL elements
+# case.number="09083797TI30A" #this case doesn't have NULLs
+#case.number="11020953CF10A"
+case.number="12019341TI20A" #problem case for person_id==4
+
+filename<-paste0("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/disps_data/",case.number,"crim_dispositions.txt_xml")
+xmlList<-filename%>%
+            read_xml()%>%
+            xmlTreeParse%>%
+            use_series(doc)%>%
+            use_series(children)%>%
+            use_series(string)%>%
+            xmlToList%>%
+            xmlParse%>%
+            xmlToList
+
+xml_chargeDispList<-xmlList$ChargeDispositionList
+#displist<- xml_chargeDispList$DispositionList
+
+isNA=FALSE #when inserting into function later, be careful where you put it
+#should be reset to F whenever we move onto a new case 
+charge_parser<-function(acharge,case.number,person.id){
+   # print(acharge)
+  # print(case.number)
+  # print(person.id)
+  # charge_with_null<<-acharge$DispositionList
+  acharge<<-acharge
+  if(is.null(acharge$DispositionList)){
+    isNA<<-TRUE
+    print("isnull")
+    return(NA)
+  }
+  
+  disp_frame<-acharge$DispositionList%>%
+               # print()%>%
+              unlist()%>%
+  #             # print()%>%
+              matrix(nrow=1,byrow=T)%>%
+
+              data.frame(stringsAsFactors=F)
+
+  disp_frame<-mutate(disp_frame,case_number=case.number,
+              person_id=person.id,
+              OffenseDate=acharge$Offense_Date,
+              Charge=acharge$Charge)
+}
+
+removeNA_matrixCol<-function(matrix){
+  if(isNA==T){
+    print("isNA==T")
+    return(matrix[colSums(!is.na(matrix))>0])
+  }
+  return(matrix)
+}
+xml_df<-sapply(xmlList[-1],charge_parser,case.number,person.id)%>%
+            t()%>%
+            # print()%>%
+            removeNA_matrixCol(.)%>%
+            as.data.frame(row.names=NULL,stringsAsFactors=F)
+
+            
+#col1<-as.character(xml_df$c..01.08.2010....convicted.by.Plea...Adjudicated..)
+#testdf<-data.frame(matrix(unlist(displist), nrow=1, byrow=T),stringsAsFactors=FALSE)
+#tibble<- as_data_frame(unlist(displist))
+
+
+```
+
+Test sapply
+```{r}
+adder<-function(x,charac){
+  print(charac)
+  x+3
+}
+sapply_test<-sapply(1:3,adder,"a")
+```
+
+
+
