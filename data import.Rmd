@@ -1,7 +1,9 @@
 ---
 title: "R Notebook"
+location: b-data-query
 output: html_notebook
 ---
+
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
@@ -314,7 +316,8 @@ Cases for person_id==4:
  [7] "13002653MM10A" "13004375TC10A" "13005330CF10A" "13010663CF10A" "13011511MM10A" "14012120TC10A"
 [13] "16000322MM10A" "16000754MM20A"
 
-
+12019341TI20A is causing issues
+Debugging notes: acharge is a list of 7
 ```{r}
 # request="crim_dispositions"
 # disp<-get_data(casenum, request,"xml" )
@@ -337,7 +340,7 @@ xmlList<-filename%>%
             xmlParse%>%
             xmlToList
 
-xml_chargeDispList<-xmlList$ChargeDispositionList
+# xml_chargeDispList<-xmlList$ChargeDispositionList
 #displist<- xml_chargeDispList$DispositionList
 
 isNA=FALSE #when inserting into function later, be careful where you put it
@@ -375,17 +378,76 @@ removeNA_matrixCol<-function(matrix){
   }
   return(matrix)
 }
+debug(charge_parser)
 xml_df<-sapply(xmlList[-1],charge_parser,case.number,person.id)%>%
-            t()%>%
+            t()
             # print()%>%
-            removeNA_matrixCol(.)%>%
-            as.data.frame(row.names=NULL,stringsAsFactors=F)
+            # removeNA_matrixCol(.)
+            # as.data.frame(row.names=NULL,stringsAsFactors=F)
+            # map_df(unlist) 
 
             
 #col1<-as.character(xml_df$c..01.08.2010....convicted.by.Plea...Adjudicated..)
 #testdf<-data.frame(matrix(unlist(displist), nrow=1, byrow=T),stringsAsFactors=FALSE)
 #tibble<- as_data_frame(unlist(displist))
 
+View(charge_parser(acharge,case.number,person.id))
+View(xml_df)
+```
+
+a second copy of code so I can look at the way my code handles 2 different cases
+```{r}
+person.id=4
+case.number2="09083797TI30A" #this case doesn't have NULLs
+
+filename2<-paste0("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/disps_data/",case.number2,"crim_dispositions.txt_xml")
+xmlList2<-filename2%>%
+            read_xml()%>%
+            xmlTreeParse%>%
+            use_series(doc)%>%
+            use_series(children)%>%
+            use_series(string)%>%
+            xmlToList%>%
+            xmlParse%>%
+            xmlToList
+
+# xml_chargeDispList<-xmlList$ChargeDispositionList
+#displist<- xml_chargeDispList$DispositionList
+
+isNA=FALSE #when inserting into function later, be careful where you put it
+#should be reset to F whenever we move onto a new case 
+charge_parser2<-function(acharge,case.number,person.id){
+  acharge2<<-acharge
+  if(is.null(acharge$DispositionList)){
+    isNA<<-TRUE
+    print("isnull")
+    return(NA)
+  }
+  disp_frame<-acharge$DispositionList%>%
+               # print()%>%
+              unlist()%>%
+  #             # print()%>%
+              matrix(nrow=1,byrow=T)%>%
+
+              data.frame(stringsAsFactors=F)
+
+  disp_frame<-mutate(disp_frame,case_number=case.number,
+              person_id=person.id,
+              OffenseDate=acharge$Offense_Date,
+              Charge=acharge$Charge)
+}
+
+xml_df2<-sapply(xmlList2[-1],charge_parser2,case.number2,person.id)%>%
+            t()
+            # print()%>%
+            # removeNA_matrixCol(.)
+            # as.data.frame(row.names=NULL,stringsAsFactors=F)
+            # map_df(unlist) 
+
+samplecharge1=(charge_parser(acharge,case.number,person.id))
+samplecharge2=(charge_parser(acharge2,case.number,person.id))
+View(xml_df)
+View(xml_df2)
 
 ```
 

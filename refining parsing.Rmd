@@ -1,0 +1,98 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(xml2)
+library(XML)
+library(magrittr)
+
+```
+
+
+```{r}
+x = lapply(which(names(xmlList)=='ChargeDispositionList'), 
+       function(k) lapply(which(names(xmlList[[k]])=='DispositionList'), function(i) xmlList[[k]][[i]])
+  )
+
+#gets a list hopefully with all the chargeDispositionLists and DispositionLists, all numbered differently
+#lapply(which(names(xmlList[[2]])=='DispositionList'), function(i) xmlList[[2]][[i]])
+```
+
+Test processing crim_dispositions with xml2 and XML packages
+Cases for person_id==4: 
+[1] "09024308TI20A" "09057909TI20A" "11020953CF10A" "12017635CF10A" "12019341TI20A" "12074993TI30A"
+ [7] "13002653MM10A" "13004375TC10A" "13005330CF10A" "13010663CF10A" "13011511MM10A" "14012120TC10A"
+[13] "16000322MM10A" "16000754MM20A"
+
+FUNCTION NOTES: 
+disp_parser2 takes in a list and returns a dataframe for a SINGLE disposition. Note that each CASE can have multiple CHARGES, and each CHARGE has multiple dispositions. 
+charge_parser2 takes in a list and returns a dataframe for a single CHARGE
+```{r}
+person.id=4
+
+# case.number="13000570CF10A" #this case has NULL elements
+# case.number="09083797TI30A" #this case doesn't have NULLs
+#case.number="11020953CF10A"
+# case.number="12019341TI20A" #problem case for person_id==4
+
+
+# case.number2="12019341TI20A"
+case.number2="13000570CF10A" #this case has NULL elements
+
+filename2<-paste0("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/disps_data/",case.number2,"crim_dispositions.txt_xml")
+xmlList2<-filename2%>%
+            read_xml()%>%
+            xmlTreeParse%>%
+            use_series(doc)%>%
+            use_series(children)%>%
+            use_series(string)%>%
+            xmlToList%>%
+            xmlParse%>%
+            xmlToList
+
+filtered_list = lapply(which(names(xmlList2)=='ChargeDispositionList'), 
+       function(k) lapply(which(names(xmlList2[[k]])=='DispositionList'|names(xmlList2[[k]])=='Offense_Date'|names(xmlList2[[k]])=='Charge'), function(i) xmlList2[[k]][[i]])
+  )
+
+disp_parser2<-function(a_disp){
+  #a_disp is a list for ONE DISPOSITION
+  disp_frame<-a_disp%>%
+                unlist()%>%
+                matrix(nrow=1, byrow=T)%>%
+                data.frame(stringsAsFactors=F)
+}
+
+charge_parser2<-function(acharge,case.number,person.id){
+  #acharge is the list containing charge number, offense date, and disposition information 
+  #NOTE THAT THERE CAN BE MORE THAN ONE DISPOSTION, which is  why I have to isolated the dispositions in their own list and call map_df on them
+  displists<-acharge[-1][-1]
+  #displist is a list containing ONLY dispositions for ONE charge
+  charge_frame<-displists%>%
+                map_df(disp_parser2)%>%
+                mutate(case_number=case.number,
+                       person_id=person.id,
+                       OffenseDate=acharge[[2]],
+                       Charge=acharge[[1]] #this refers to the charge number. How do I know the ordering is always consistent? 
+                )
+}
+
+xml_df2<-map_df(filtered_list,charge_parser2,case.number2,person.id)
+            # t()
+            # print()%>%
+            # removeNA_matrixCol(.)
+            # as.data.frame(row.names=NULL,stringsAsFactors=F)
+            # map_df(unlist) 
+
+
+```
+

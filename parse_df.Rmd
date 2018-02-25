@@ -1,6 +1,7 @@
 ---
 title: "R Notebook"
 output: html_notebook
+location: b-data-query
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
@@ -151,13 +152,14 @@ reparse_from_system<-function(sample_row){
   #         t()%>%
   #         as.data.frame(row.names=NULL)
   
-  xml_df<<-sapply(xmlList[-1],charge_parser,case.number,person.id,isNA)%>%
-            t()%>%
+  xml_df<<-sapply(xmlList[-1],charge_parser,case.number,person.id,isNA)%>% #outputs list
+            t()%>% #outputs matrix
             
-            removeNA_matrixCol(.,isNA )%>%
+            removeNA_matrixCol(.,isNA )%>% #outputs matrix
 
             as_data_frame(row.names=NULL,stringsAsFactors=F)%>% #problem: column types are list
             map_df(unlist) 
+  
   #this function will apply the unlist function to each column, so that each column is now a character vector as desired
   #was experiencing issue where a few dataframes produced by this function had column type character, but the vast majority had column type list, so couldn't rbind it. 
             # lapply(as.character)%>% #issue: screws up column names
@@ -165,17 +167,13 @@ reparse_from_system<-function(sample_row){
 
   
   print(xml_df)
-  # xml_df<-xml_df%>%
-  #         lapply(as.character)%>%
-  #         as_data_frame()#prospective code to fix binding problem
-
   return(xml_df)
 }
 
 safe_reparse<-safely(reparse_from_system)
 
 wrapper_reparse<-function(sample_row){
-  # options(error=recover)
+  options(error=recover)
   # res<-safe_reparse(sample_row)
   res<-reparse_from_system(sample_row)
 

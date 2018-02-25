@@ -142,7 +142,7 @@ $(document).ready(function () {
 </style>
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("data import.Rmd");
+  window.initializeSourceEmbed("refining parsing.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
@@ -173,546 +173,97 @@ $(document).ready(function () {
 
 <!-- rnb-text-begin -->
 <p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a> Notebook. When you execute code within the notebook, the results appear beneath the code.</p>
-<p>Try executing this chunk by clicking the <em>Run</em> button within the chunk or by placing your cursor inside it and pressing <em>Ctrl+Shift+Enter</em>.</p>
+<p>When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the <em>Preview</em> button or press <em>Ctrl+Shift+K</em> to preview the HTML file).</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBMb2FkIHBhY2thZ2VzXG5saWJyYXJ5KHRpZHl2ZXJzZSlcbmxpYnJhcnkoaHR0cilcbmxpYnJhcnkoanNvbmxpdGUpXG5saWJyYXJ5KHhtbDIpXG5saWJyYXJ5KFhNTClcbmxpYnJhcnkobWFncml0dHIpXG5gYGAifQ== -->
-<pre class="r"><code># Load packages
-library(tidyverse)
-library(httr)
-library(jsonlite)
-library(xml2)
-library(XML)
-library(magrittr)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5gYGAifQ== -->
+<pre class="r"><code>library(tidyverse)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Evdocs failed 16 times due to [500] error on first 10,000 requests 18 failures on 10,000-20,000 46 failures on 20,000-40,000 66 failures on 40,000-80,000 Broward county username/passwork: clw74 <a href="mailto:Duke@1234">Duke@1234</a></p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubG9vcGRmPC1yZWFkLmNzdihmaWxlPVwiRGF0YSB0YWJsZXMvbG9vcGRmLmNzdlwiKSBcbiNsb29wZGY8LXNlbGVjdChsb29wZGYsIHBlcnNvbl9pZCwgY2FzZV9udW1iZXIpXG5cbnNhbXBsZTwtc2xpY2UobG9vcGRmLDQwMDAwOm4oKSlcbiNzYW1wbGU8LWxvb3BkZlxuc2FtcGxlJGNhc2VfbnVtYmVyPC1hcy5jaGFyYWN0ZXIoc2FtcGxlJGNhc2VfbnVtYmVyKVxuc2FtcGxlJHBlcnNvbl9pZDwtYXMubnVtZXJpYyhzYW1wbGUkcGVyc29uX2lkKVxuZGZfYXNfbGlzdDwtc2FtcGxlJT4lXG4gICAgICAgICAgICAgIHNwbGl0KHNlcShucm93KC4pKSklPiVcbiAgICAgICAgICAgICAgbGFwcGx5KGFzLnZlY3RvcilcbmBgYCJ9 -->
-<pre class="r"><code>loopdf&lt;-read.csv(file=&quot;Data tables/loopdf.csv&quot;) 
-#loopdf&lt;-select(loopdf, person_id, case_number)
+<!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSCRdGlkeXZlcnNlkiB3YXMgYnVpbHQgdW5kZXIgUiB2ZXJzaW9uIDMuNC4zLS0gQXR0YWNoaW5nIHBhY2thZ2VzIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gdGlkeXZlcnNlIDEuMi4xIC0tXG52IGdncGxvdDIgMi4yLjEgICAgIHYgcHVycnIgICAwLjIuNFxudiB0aWJibGUgIDEuMy40ICAgICB2IGRwbHlyICAgMC43LjRcbnYgdGlkeXIgICAwLjcuMiAgICAgdiBzdHJpbmdyIDEuMi4wXG52IHJlYWRyICAgMS4xLjEgICAgIHYgZm9yY2F0cyAwLjIuMFxucGFja2FnZSCRZ2dwbG90MpIgd2FzIGJ1aWx0IHVuZGVyIFIgdmVyc2lvbiAzLjQuMnBhY2thZ2UgkXRpYmJsZZIgd2FzIGJ1aWx0IHVuZGVyIFIgdmVyc2lvbiAzLjQuMnBhY2thZ2UgkXRpZHlykiB3YXMgYnVpbHQgdW5kZXIgUiB2ZXJzaW9uIDMuNC4zcGFja2FnZSCRcmVhZHKSIHdhcyBidWlsdCB1bmRlciBSIHZlcnNpb24gMy40LjJwYWNrYWdlIJFwdXJycpIgd2FzIGJ1aWx0IHVuZGVyIFIgdmVyc2lvbiAzLjQuM3BhY2thZ2UgkWRwbHlykiB3YXMgYnVpbHQgdW5kZXIgUiB2ZXJzaW9uIDMuNC4ycGFja2FnZSCRZm9yY2F0c5Igd2FzIGJ1aWx0IHVuZGVyIFIgdmVyc2lvbiAzLjQuMy0tIENvbmZsaWN0cyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHRpZHl2ZXJzZV9jb25mbGljdHMoKSAtLVxueCBkcGx5cjo6ZmlsdGVyKCkgbWFza3Mgc3RhdHM6OmZpbHRlcigpXG54IGRwbHlyOjpsYWcoKSAgICBtYXNrcyBzdGF0czo6bGFnKClcbiJ9 -->
+<pre><code>package &lt;U+393C&gt;&lt;U+3E31&gt;tidyverse&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3-- Attaching packages ---------------------------------------------------------- tidyverse 1.2.1 --
+v ggplot2 2.2.1     v purrr   0.2.4
+v tibble  1.3.4     v dplyr   0.7.4
+v tidyr   0.7.2     v stringr 1.2.0
+v readr   1.1.1     v forcats 0.2.0
+package &lt;U+393C&gt;&lt;U+3E31&gt;ggplot2&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.2package &lt;U+393C&gt;&lt;U+3E31&gt;tibble&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.2package &lt;U+393C&gt;&lt;U+3E31&gt;tidyr&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3package &lt;U+393C&gt;&lt;U+3E31&gt;readr&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.2package &lt;U+393C&gt;&lt;U+3E31&gt;purrr&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3package &lt;U+393C&gt;&lt;U+3E31&gt;dplyr&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.2package &lt;U+393C&gt;&lt;U+3E31&gt;forcats&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3-- Conflicts ------------------------------------------------------------- tidyverse_conflicts() --
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShodHRyKVxuYGBgIn0= -->
+<pre class="r"><code>library(httr)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSDjpLzjuLFodHRy46S847iyIHdhcyBidWlsdCB1bmRlciBSIHZlcnNpb24gMy40LjNcbiJ9 -->
+<pre><code>package &lt;U+393C&gt;&lt;U+3E31&gt;httr&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShqc29ubGl0ZSlcbmBgYCJ9 -->
+<pre class="r"><code>library(jsonlite)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSDjpLzjuLFqc29ubGl0ZeOkvOO4siB3YXMgYnVpbHQgdW5kZXIgUiB2ZXJzaW9uIDMuNC4zXG5BdHRhY2hpbmcgcGFja2FnZTog46S847ixanNvbmxpdGXjpLzjuLJcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g46S847ixcGFja2FnZTpwdXJycuOkvOO4sjpcblxuICAgIGZsYXR0ZW5cbiJ9 -->
+<pre><code>package &lt;U+393C&gt;&lt;U+3E31&gt;jsonlite&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3
+Attaching package: &lt;U+393C&gt;&lt;U+3E31&gt;jsonlite&lt;U+393C&gt;&lt;U+3E32&gt;
 
-sample&lt;-slice(loopdf,40000:n())
-#sample&lt;-loopdf
-sample$case_number&lt;-as.character(sample$case_number)
-sample$person_id&lt;-as.numeric(sample$person_id)
-df_as_list&lt;-sample%&gt;%
-              split(seq(nrow(.)))%&gt;%
-              lapply(as.vector)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Querying data for events and documents (used for failure to appear) PROBLEM: find case with lots of charges, see if 2nd page is generated</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJDOi9Vc2Vycy9DYXJvbGluZSBXYW5nL09uZURyaXZlL0R1a2UvQ3JpbWluYWwgUmVjaWRpdmlzbS9icm93YXJkLWRhdGEtcXVlcnkvZXZlbnRzX2RvY3NfZGF0YVwiKVxuI3NvIHRoYXQgd3JpdGVUb1N5c3RlbSB3cml0ZXMgdG8gY29ycmVjdCBwbGFjZVxuXG5wYiA8LSBwcm9ncmVzc19lc3RpbWF0ZWQobGVuZ3RoKHNhbXBsZSRjYXNlX251bWJlcikpXG5ldmVudHNkb2NzX2RmPC1tYXBfZGZyKGRmX2FzX2xpc3QsIH53cmFwcGVyKC54LFwiZXZlbnRzX2FuZF9kb2N1bWVudHNcIixcImpzb25cIikpXG5cbmBgYCJ9 -->
-<pre class="r"><code>setwd(&quot;C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/events_docs_data&quot;)
-#so that writeToSystem writes to correct place
+The following object is masked from &lt;U+393C&gt;&lt;U+3E31&gt;package:purrr&lt;U+393C&gt;&lt;U+3E32&gt;:
 
-pb &lt;- progress_estimated(length(sample$case_number))
-eventsdocs_df&lt;-map_dfr(df_as_list, ~wrapper(.x,&quot;events_and_documents&quot;,&quot;json&quot;))
-</code></pre>
+    flatten</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh4bWwyKVxuYGBgIn0= -->
+<pre class="r"><code>library(xml2)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJDOi9Vc2Vycy9DYXJvbGluZSBXYW5nL09uZURyaXZlL0R1a2UvQ3JpbWluYWwgUmVjaWRpdmlzbS9icm93YXJkLWRhdGEtcXVlcnkvZXZlbnRzX2RvY3NfZGF0YVwiKVxuI3NvIHRoYXQgd3JpdGVUb1N5c3RlbSB3cml0ZXMgdG8gY29ycmVjdCBwbGFjZVxuXG5ldmVudHNkZXNjcnBfZGY8LXNlbGVjdChldmVudHNkb2NzX2RmLCBwZXJzb25faWQsY2FzZV9udW0sRXZlbnREYXRlLERlc2NyaXB0aW9uLEV2ZW50QW1vdW50LEFkZGl0aW9uYWxUZXh0KVxud3JpdGUuY3N2KGV2ZW50c2Rlc2NycF9kZixcInNhbXBsZV9ldmVudHNkZXNjcnBfZGY0LmNzdlwiKVxuIHJtKGV2ZW50c2Rlc2NycF9kZilcbiBybShldmVudHNkb2NzX2RmKVxuXG5gYGAifQ== -->
-<pre class="r"><code>setwd(&quot;C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/events_docs_data&quot;)
-#so that writeToSystem writes to correct place
+<!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSDjpLzjuLF4bWwy46S847iyIHdhcyBidWlsdCB1bmRlciBSIHZlcnNpb24gMy40LjNcbiJ9 -->
+<pre><code>package &lt;U+393C&gt;&lt;U+3E31&gt;xml2&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShYTUwpXG5gYGAifQ== -->
+<pre class="r"><code>library(XML)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSDjpLzjuLFYTUzjpLzjuLIgd2FzIGJ1aWx0IHVuZGVyIFIgdmVyc2lvbiAzLjQuM1xuIn0= -->
+<pre><code>package &lt;U+393C&gt;&lt;U+3E31&gt;XML&lt;U+393C&gt;&lt;U+3E32&gt; was built under R version 3.4.3</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShtYWdyaXR0cilcbmBgYCJ9 -->
+<pre class="r"><code>library(magrittr)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTog46S847ixbWFncml0dHLjpLzjuLJcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g46S847ixcGFja2FnZTpwdXJycuOkvOO4sjpcblxuICAgIHNldF9uYW1lc1xuXG5UaGUgZm9sbG93aW5nIG9iamVjdCBpcyBtYXNrZWQgZnJvbSDjpLzjuLFwYWNrYWdlOnRpZHly46S847iyOlxuXG4gICAgZXh0cmFjdFxuIn0= -->
+<pre><code>
+Attaching package: &lt;U+393C&gt;&lt;U+3E31&gt;magrittr&lt;U+393C&gt;&lt;U+3E32&gt;
 
-eventsdescrp_df&lt;-select(eventsdocs_df, person_id,case_num,EventDate,Description,EventAmount,AdditionalText)
-write.csv(eventsdescrp_df,&quot;sample_eventsdescrp_df4.csv&quot;)
- rm(eventsdescrp_df)
- rm(eventsdocs_df)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Querying data for dispositions (for convictions)</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJDOi9Vc2Vycy9DYXJvbGluZSBXYW5nL09uZURyaXZlL0R1a2UvQ3JpbWluYWwgUmVjaWRpdmlzbS9icm93YXJkLWRhdGEtcXVlcnkvZGlzcHNfZGF0YVwiKVxuI3NvIHRoYXQgd3JpdGVUb1N5c3RlbSB3cml0ZXMgdG8gY29ycmVjdCBwbGFjZVxuXG5wYiA8LSBwcm9ncmVzc19lc3RpbWF0ZWQobGVuZ3RoKHNhbXBsZSRjYXNlX251bWJlcikpXG5kaXNwb3NpdGlvbnNfZGY8LW1hcF9kZnIoZGZfYXNfbGlzdCwgfndyYXBwZXIoLngsXCJjcmltX2Rpc3Bvc2l0aW9uc1wiLFwieG1sXCIpKVxuXG5gYGAifQ== -->
-<pre class="r"><code>setwd(&quot;C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/disps_data&quot;)
-#so that writeToSystem writes to correct place
+The following object is masked from &lt;U+393C&gt;&lt;U+3E31&gt;package:purrr&lt;U+393C&gt;&lt;U+3E32&gt;:
 
-pb &lt;- progress_estimated(length(sample$case_number))
-dispositions_df&lt;-map_dfr(df_as_list, ~wrapper(.x,&quot;crim_dispositions&quot;,&quot;xml&quot;))
-</code></pre>
-<!-- rnb-source-end -->
+    set_names
+
+The following object is masked from &lt;U+393C&gt;&lt;U+3E31&gt;package:tidyr&lt;U+393C&gt;&lt;U+3E32&gt;:
+
+    extract</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJDOi9Vc2Vycy9DYXJvbGluZSBXYW5nL09uZURyaXZlL0R1a2UvQ3JpbWluYWwgUmVjaWRpdmlzbS9icm93YXJkLWRhdGEtcXVlcnkvZGlzcHNfZGF0YVwiKVxuI3NvIHRoYXQgd3JpdGVUb1N5c3RlbSB3cml0ZXMgdG8gY29ycmVjdCBwbGFjZVxuXG5kaXNwb3NpdGlvbnNfZGY8LXJlbmFtZShkaXNwb3NpdGlvbnNfZGYsIEp1ZGdlbWVudERhdGU9WDEsRGVzY3JpcHRpb249WDIpXG53cml0ZS5jc3YoZGlzcG9zaXRpb25zX2RmLFwiZmluYWxfZGlzcF9kZi5jc3ZcIilcbnJtKGRpc3Bvc2l0aW9uc19kZilcbmBgYCJ9 -->
-<pre class="r"><code>setwd(&quot;C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/broward-data-query/disps_data&quot;)
-#so that writeToSystem writes to correct place
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxueCA9IGxhcHBseSh3aGljaChuYW1lcyh4bWxMaXN0KT09J0NoYXJnZURpc3Bvc2l0aW9uTGlzdCcpLCBcbiAgICAgICBmdW5jdGlvbihrKSBsYXBwbHkod2hpY2gobmFtZXMoeG1sTGlzdFtba11dKT09J0Rpc3Bvc2l0aW9uTGlzdCcpLCBmdW5jdGlvbihpKSB4bWxMaXN0W1trXV1bW2ldXSlcbiAgKVxuXG4jZ2V0cyBhIGxpc3QgaG9wZWZ1bGx5IHdpdGggYWxsIHRoZSBjaGFyZ2VEaXNwb3NpdGlvbkxpc3RzIGFuZCBEaXNwb3NpdGlvbkxpc3RzLCBhbGwgbnVtYmVyZWQgZGlmZmVyZW50bHlcbiNsYXBwbHkod2hpY2gobmFtZXMoeG1sTGlzdFtbMl1dKT09J0Rpc3Bvc2l0aW9uTGlzdCcpLCBmdW5jdGlvbihpKSB4bWxMaXN0W1syXV1bW2ldXSlcbmBgYCJ9 -->
+<pre class="r"><code>x = lapply(which(names(xmlList)=='ChargeDispositionList'), 
+       function(k) lapply(which(names(xmlList[[k]])=='DispositionList'), function(i) xmlList[[k]][[i]])
+  )
 
-dispositions_df&lt;-rename(dispositions_df, JudgementDate=X1,Description=X2)
-write.csv(dispositions_df,&quot;final_disp_df.csv&quot;)
-rm(dispositions_df)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p><strong>FUNCTIONS</strong> <em>wrapper()</em> uses all the functions specified below to make call to Broward Clerk’s Office site, write the data string to the system, and process it into a dataframe. Wrapped the safely ‘version’ of api_call to process the list result (returned by safe_api_call) into a dataframe.</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYXBpX2NhbGw8LWZ1bmN0aW9uKHNhbXBsZV9yb3cscmVxdWVzdCxkYXRhX3R5cGUpe1xuICBvcHRpb25zKGVycm9yPXJlY292ZXIpXG4gIHBiJHRpY2soKSRwcmludCgpXG4gIFxuIyAgU3lzLnNsZWVwKHNhbXBsZShzZXEoMC41LCAyLjUsIDAuNSksIDEpKSAjdGltZSBkZWxheSBiZXR3ZWVuIGNhbGxzXG4gIFxuICBwZXJzb24uaWQ8LXNhbXBsZV9yb3ckcGVyc29uX2lkXG4gIGNhc2UubnVtYmVyPC1zYW1wbGVfcm93JGNhc2VfbnVtYmVyXG4gIGRhdGE8LWdldF9kYXRhKGNhc2UubnVtYmVyICxyZXF1ZXN0LGRhdGFfdHlwZSlcbiAgZmlsZW5hbWU8LXdyaXRlVG9TeXN0ZW0oZGF0YSxjYXNlLm51bWJlcixwYXN0ZShyZXF1ZXN0LFwiLnR4dFwiLHNlcD1cIlwiKSxkYXRhX3R5cGUpICNzYXZlcyBmaWxlIHRvIHN5c3RlbSB1c2luZyBjYXNlbnVtIGFuZCByZXF1ZXN0IHR5cGUgaW4gdGhlIG5hbWU7IHJldHVybnMgZmlsZW5hbWVcbiAgXG4gIGlmIChkYXRhX3R5cGU9PVwianNvblwiKXtcbiAgICBqc29uX2Zyb21maWxlPC1mcm9tSlNPTih0eHQ9ZmlsZW5hbWUpXG4gICAjYSBsaXN0IGRmIGh5YnJpZFxuICAgIGpzb25fZGY8LWpzb25fYXNfZGYoanNvbl9mcm9tZmlsZSxjYXNlLm51bWJlcixwZXJzb24uaWQpXG4gICAgcmV0dXJuKGpzb25fZGYpXG4gIH1cbiAgZWxzZSBpZiAoZGF0YV90eXBlPT1cInhtbFwiKXtcbiAgICB4bWxfZGY8LXhtbF9hc19kZihmaWxlbmFtZSxjYXNlLm51bWJlcixwZXJzb24uaWQpXG4gIH1cbn1cblxuc2FmZV9hcGlfY2FsbDwtc2FmZWx5KGFwaV9jYWxsKVxuXG53cmFwcGVyPC1mdW5jdGlvbihzYW1wbGVfcm93LHJlcXVlc3QsZGF0YV90eXBlKXtcbiAgb3B0aW9ucyhlcnJvcj1yZWNvdmVyKVxuICByZXM8LXNhZmVfYXBpX2NhbGwoc2FtcGxlX3JvdyxyZXF1ZXN0LGRhdGFfdHlwZSlcbiAgaWYoaXMubnVsbChyZXMkcmVzdWx0KSl7XG4gICAgcmV0dXJuKClcbiAgfVxuICByZXR1cm4ocmVzJHJlc3VsdClcbn1cblxuYGBgIn0= -->
-<pre class="r"><code>api_call&lt;-function(sample_row,request,data_type){
-  options(error=recover)
-  pb$tick()$print()
-  
-#  Sys.sleep(sample(seq(0.5, 2.5, 0.5), 1)) #time delay between calls
-  
-  person.id&lt;-sample_row$person_id
-  case.number&lt;-sample_row$case_number
-  data&lt;-get_data(case.number ,request,data_type)
-  filename&lt;-writeToSystem(data,case.number,paste(request,&quot;.txt&quot;,sep=&quot;&quot;),data_type) #saves file to system using casenum and request type in the name; returns filename
-  
-  if (data_type==&quot;json&quot;){
-    json_fromfile&lt;-fromJSON(txt=filename)
-   #a list df hybrid
-    json_df&lt;-json_as_df(json_fromfile,case.number,person.id)
-    return(json_df)
-  }
-  else if (data_type==&quot;xml&quot;){
-    xml_df&lt;-xml_as_df(filename,case.number,person.id)
-  }
-}
-
-safe_api_call&lt;-safely(api_call)
-
-wrapper&lt;-function(sample_row,request,data_type){
-  options(error=recover)
-  res&lt;-safe_api_call(sample_row,request,data_type)
-  if(is.null(res$result)){
-    return()
-  }
-  return(res$result)
-}
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p><em>get_data</em> returns a json/xml string from the Broward Clerk’s website through HTTP GET request <em>writeToSystem</em> takes a json HTTP response and saves it as .txt file a “void” function, but prints the filename <em>data_as_df</em> processes json/xml string into a dataframe (different processing needed for events_docs and crim_dispositions) <em>charge_parser</em> is a helper function for xml_as_df</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2V0X2RhdGE8LWZ1bmN0aW9uKGNhc2VudW1iZXIscmVxdWVzdF90eXBlLCBkYXRhX3R5cGUpe1xuICB1cmxfYnJvd2FyZDwtXCJodHRwczovL2FwaS5icm93YXJkY2xlcmsub3JnL2FwaS9cIlxuICBrZXk8LVwiTG81TXQ2RUVKSXdESUx2cHVzSXR5dkRudExzTHFNd3VNR3pydkxGRHNLekRzbnlwcXVJM0pENkNMS29vcEx4d3ZueXB0dENLRXFHbkdzNnNGOUVLRm5yMjFxRDRNSkZudkV3b3ZEd3F0cDczbnpDdHlFR3pKcnN5OEs0cnNEOXRGRUd2S3A4cHNwRXl4ckd3MG94dEVGMkhGb0QxS3JIR0dFeHR0REhKQ0YyeXoxem9EdUR4bnB4bnV3c0pvOHJLN0gxR3NwR0dJeHhGenRETHV0RHlxSEdEcnZGM3NISnN5eHd6TEN3REpuTUNuTXczQ01zSHZ6ckxFS1wiXG4gIHVybD1wYXN0ZTAodXJsX2Jyb3dhcmQsJ2Nhc2UvJyxjYXNlbnVtYmVyLCcvJyxyZXF1ZXN0X3R5cGUsJy4nLGRhdGFfdHlwZSwnP2F1dGhfa2V5PScsa2V5KVxuIyAgcHJpbnQodXJsKVxuICBldmVudHNkb2NzPC1SRVRSWShcIkdFVFwiLCB1cmwsdGltZXM9NSlcbiAgICAjcmV0cmllcyB1bnRpbCBodHRwX2Vycm9yIChib29sZWFuKSByZXR1cm5zIGZhbHNlOyB0cnVlIGlmIHN0YXR1cyBjb2RlIGlzIDQwMCtcbiAgICAjcmV0cmllcyBtYXggb2YgNXg7IDEgc2VjIHBhdXNlcyBiZXR3ZWVuIHRyaWVzXG4gIHJldHVybihldmVudHNkb2NzKSAjciBhdXRvbWF0aWNhbGx5IHJldHVybnMgbGFzdCBsaW5lIGJ1dCB3ZSdsbCBleHBsaWNpdGx5IHJldHVybiB0aGlzIGhlcmVcbn1cblxud3JpdGVUb1N5c3RlbTwtZnVuY3Rpb24od2ViX3Jlc3BvbnNlLGNhc2VudW1iZXIsIGZpbGV0eXBlLGRhdGFfdHlwZSl7XG4gIGZpbGVuYW1lPXBhc3RlKGNhc2VudW1iZXIsZmlsZXR5cGUsXCJfXCIsZGF0YV90eXBlLCBzZXA9XCJcIilcbiAgcmF3PC1jb250ZW50KHdlYl9yZXNwb25zZSxcInJhd1wiKVxuICB3cml0ZUJpbihyYXcsZmlsZW5hbWUpXG4gIHJldHVybihmaWxlbmFtZSlcbn1cblxuanNvbl9hc19kZjwtZnVuY3Rpb24oZGF0YV9mcm9tZmlsZSxjYXNlLm51bWJlcixwZXJzb24uaWQpe1xuICAgICBqc29uX2RmPC1kYXRhX2Zyb21maWxlJT4lXG4gICAgICAgICAgICAgIHVzZV9zZXJpZXMoRXZlbnRMaXN0KSU+JSAgI3RoZSBtYWdyaXR0ciB2ZXJzaW9uIG9mICQgb3BlcmF0b3JcbiAgICAgICAgICAgICAgbXV0YXRlKGNhc2VfbnVtPWNhc2UubnVtYmVyLCBwZXJzb25faWQ9cGVyc29uLmlkKVxuICAgICByZXR1cm4oanNvbl9kZilcbn1cblxuY2hhcmdlX3BhcnNlcjwtZnVuY3Rpb24oYWNoYXJnZSl7XG4gIGFjaGFyZ2UlPiVcbiAgICB1c2Vfc2VyaWVzKERpc3Bvc2l0aW9uTGlzdCklPiVcbiAgICB1bmxpc3QoKSU+JVxuICAgIG1hdHJpeChucm93PTEsYnlyb3c9VCklPiVcbiAgICBkYXRhLmZyYW1lKHN0cmluZ3NBc0ZhY3RvcnM9RiklPiVcbiAgICBtdXRhdGUoY2FzZV9udW1iZXI9eG1sTGlzdCRDYXNlX051bWJlcixcbiAgICAgICAgICBPZmZlbnNlRGF0ZT1hY2hhcmdlJE9mZmVuc2VfRGF0ZSxcbiAgICAgICAgICBDaGFyZ2U9YWNoYXJnZSRDaGFyZ2UpXG59XG5cbnhtbF9hc19kZjwtZnVuY3Rpb24oZmlsZW5hbWUsY2FzZS5udW1iZXIscGVyc29uLmlkKXtcbiAgeG1sTGlzdDwtZmlsZW5hbWUlPiVcbiAgICAgICAgICAgIHJlYWRfeG1sKCklPiVcbiAgICAgICAgICAgIHhtbFRyZWVQYXJzZSU+JVxuICAgICAgICAgICAgdXNlX3Nlcmllcyhkb2MpJT4lXG4gICAgICAgICAgICB1c2Vfc2VyaWVzKGNoaWxkcmVuKSU+JVxuICAgICAgICAgICAgdXNlX3NlcmllcyhzdHJpbmcpJT4lXG4gICAgICAgICAgICB4bWxUb0xpc3QlPiVcbiAgICAgICAgICAgIHhtbFBhcnNlJT4lXG4gICAgICAgICAgICB4bWxUb0xpc3RcblxuICB4bWxfZGY8LXhtbExpc3RbLTFdJT4lXG4gICAgICAgICAgICBzYXBwbHkoY2hhcmdlX3BhcnNlciklPiVcbiAgICAgICAgICAgIHQoKSU+JVxuICAgICAgICAgICAgYXMuZGF0YS5mcmFtZShyb3cubmFtZXM9Rilcbn1cbmBgYCJ9 -->
-<pre class="r"><code>get_data&lt;-function(casenumber,request_type, data_type){
-  url_broward&lt;-&quot;https://api.browardclerk.org/api/&quot;
-  key&lt;-&quot;Lo5Mt6EEJIwDILvpusItyvDntLsLqMwuMGzrvLFDsKzDsnypquI3JD6CLKoopLxwvnypttCKEqGnGs6sF9EKFnr21qD4MJFnvEwovDwqtp73nzCtyEGzJrsy8K4rsD9tFEGvKp8pspEyxrGw0oxtEF2HFoD1KrHGGExttDHJCF2yz1zoDuDxnpxnuwsJo8rK7H1GspGGIxxFztDLutDyqHGDrvF3sHJsyxwzLCwDJnMCnMw3CMsHvzrLEK&quot;
-  url=paste0(url_broward,'case/',casenumber,'/',request_type,'.',data_type,'?auth_key=',key)
-#  print(url)
-  eventsdocs&lt;-RETRY(&quot;GET&quot;, url,times=5)
-    #retries until http_error (boolean) returns false; true if status code is 400+
-    #retries max of 5x; 1 sec pauses between tries
-  return(eventsdocs) #r automatically returns last line but we'll explicitly return this here
-}
-
-writeToSystem&lt;-function(web_response,casenumber, filetype,data_type){
-  filename=paste(casenumber,filetype,&quot;_&quot;,data_type, sep=&quot;&quot;)
-  raw&lt;-content(web_response,&quot;raw&quot;)
-  writeBin(raw,filename)
-  return(filename)
-}
-
-json_as_df&lt;-function(data_fromfile,case.number,person.id){
-     json_df&lt;-data_fromfile%&gt;%
-              use_series(EventList)%&gt;%  #the magrittr version of $ operator
-              mutate(case_num=case.number, person_id=person.id)
-     return(json_df)
-}
-
-charge_parser&lt;-function(acharge){
-  acharge%&gt;%
-    use_series(DispositionList)%&gt;%
-    unlist()%&gt;%
-    matrix(nrow=1,byrow=T)%&gt;%
-    data.frame(stringsAsFactors=F)%&gt;%
-    mutate(case_number=xmlList$Case_Number,
-          OffenseDate=acharge$Offense_Date,
-          Charge=acharge$Charge)
-}
-
-xml_as_df&lt;-function(filename,case.number,person.id){
-  xmlList&lt;-filename%&gt;%
-            read_xml()%&gt;%
-            xmlTreeParse%&gt;%
-            use_series(doc)%&gt;%
-            use_series(children)%&gt;%
-            use_series(string)%&gt;%
-            xmlToList%&gt;%
-            xmlParse%&gt;%
-            xmlToList
-
-  xml_df&lt;-xmlList[-1]%&gt;%
-            sapply(charge_parser)%&gt;%
-            t()%&gt;%
-            as.data.frame(row.names=F)
-}</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p><strong>TESTING CODE</strong> Test call to api</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGIgPC0gcHJvZ3Jlc3NfZXN0aW1hdGVkKGxlbmd0aCgxKSlcblxuIyBjYXNlbnVtPC1cIjA5MDgzNzk3VEkzMEFcIlxuI3BlcnNvbmlkPC0xXG4jIHJlcXVlc3Q9XCJjcmltX2Rpc3Bvc2l0aW9uc1wiXG4jZGlzcDwtZ2V0SlNPTihjYXNlbnVtLHJlcXVlc3QpXG4jd3JpdGVUb1N5c3RlbShldmVudHNkb2NzLGNhc2VudW0sXCJldmVudHNkb2NzLnR4dFwiKVxuI3Jvdzwtc2xpY2Uoc2FtcGxlLDE6MSlcblxudGVzdGRmPC1hcGlfY2FsbChyb3cgLHJlcXVlc3QpXG5cbiNyZXN1bHQ8LWpzb25fYXNfZGYoanNvbl9zdHJpbmcsIHJlcXVlc3QsY2FzZW51bSxwZXJzb25pZClcbmBgYCJ9 -->
-<pre class="r"><code>pb &lt;- progress_estimated(length(1))
-
-# casenum&lt;-&quot;09083797TI30A&quot;
-#personid&lt;-1
-# request=&quot;crim_dispositions&quot;
-#disp&lt;-getJSON(casenum,request)
-#writeToSystem(eventsdocs,casenum,&quot;eventsdocs.txt&quot;)
-#row&lt;-slice(sample,1:1)
-
-testdf&lt;-api_call(row ,request)
-
-#result&lt;-json_as_df(json_string, request,casenum,personid)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Test map_dfr</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3Rha2VzIG1wZyBhcyBpbnB1dCBhbmQgcmV0dXJucyBhIGRmXG50ZXN0aXJpczwtc2VsZWN0KGhlYWQoaXJpcyksU2VwYWwuTGVuZ3RoLCBTZXBhbC5XaWR0aClcbnNlbGY8LWZ1bmN0aW9uKHRlc3RsaXN0KXtcbiAgcHJpbnQoXCJlbnRlcmVkIGZ1bmN0aW9uXCIpXG5cbiAgbXBnPC10ZXN0bGlzdFsxXSRtcGdcbiAgcHJpbnQobXBnKVxuICBjeWw8LXRlc3RsaXN0WzJdJGN5bFxuICByZXN1bHQ8LXRlc3RpcmlzJT4lXG4gICAgICAgICAgICAgbXVsdGlwbHlfYnkobXBnKSU+JVxuICAgICAgICAgICAgIG11dGF0ZShtdWx0YnltcGc9bXBnLG5hbWU9Y3lsKVxuICByZXR1cm4gKHJlc3VsdClcbn1cbiN0ZXN0bGlzdD1hcy5saXN0KG10Y2FycylcbnRlc3RsaXN0PC1tdGNhcnMlPiVcbiAgICAgICAgICAgICAgaGVhZCgpJT4lXG4gICAgICAgICAgICAgIHNwbGl0KHNlcShucm93KC4pKSlcbiN0ZXN0bGlzdCA8LSBzcGxpdChtdGNhcnMsIHNlcShucm93KG10Y2FycykpKVxuXG50ZXN0Y2FyczwtbWFwX2Rmcih0ZXN0bGlzdCx+c2VsZigueCkpICNmaW5kaW5nOiBtYXBkZnIgdGFrZXMgYSBsaXN0IGFzIGlucHV0LCBvciBjb2VyY2VzIGRmIGNvdW1ucyB0byBsaXN0XG4jc2hvdWxkIHJldHVybiBkZiB3aXRoIHRoZSBtcGcqdGVzdGlyaXNcbiNFeHBlY3RlZCBsZW5ndGg6IGlyaXMgbGVuZ3RoICogbXRjYXJzIGxlbmd0aDsgNiozMj0xOTJcbmBgYCJ9 -->
-<pre class="r"><code>#takes mpg as input and returns a df
-testiris&lt;-select(head(iris),Sepal.Length, Sepal.Width)
-self&lt;-function(testlist){
-  print(&quot;entered function&quot;)
-
-  mpg&lt;-testlist[1]$mpg
-  print(mpg)
-  cyl&lt;-testlist[2]$cyl
-  result&lt;-testiris%&gt;%
-             multiply_by(mpg)%&gt;%
-             mutate(multbympg=mpg,name=cyl)
-  return (result)
-}
-#testlist=as.list(mtcars)
-testlist&lt;-mtcars%&gt;%
-              head()%&gt;%
-              split(seq(nrow(.)))
-#testlist &lt;- split(mtcars, seq(nrow(mtcars)))
-
-testcars&lt;-map_dfr(testlist,~self(.x)) #finding: mapdfr takes a list as input, or coerces df coumns to list
-#should return df with the mpg*testiris
-#Expected length: iris length * mtcars length; 6*32=192</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Test map_dfr with df_as_list</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGVzdGlyaXM8LXNlbGVjdChoZWFkKGlyaXMpLFNlcGFsLkxlbmd0aCwgU2VwYWwuV2lkdGgpXG5zZWxmPC1mdW5jdGlvbihzYW1wbGVfcm93KXtcbiAgcGVyc29uLmlkPC1zYW1wbGVfcm93JHBlcnNvbl9pZFxuICBjYXNlLm51bWJlcjwtc2FtcGxlX3JvdyRjYXNlX251bWJlclxuICBcbiMgIHByaW50KFwiZW50ZXJlZCBmdW5jdGlvblwiKVxuICByZXN1bHQ8LXRlc3RpcmlzJT4lXG4gICAgICAgICAgICAgbXVsdGlwbHlfYnkoNSklPiVcbiAgICAgICAgICAgICBtdXRhdGUocGVyc2lkPXBlcnNvbi5pZCxjYXNlbnVtPWNhc2UubnVtYmVyKVxuICByZXR1cm4gKHJlc3VsdClcbn1cblxuc2FmZV9zZWxmPC1zYWZlbHkoc2VsZilcblxud3JhcHBlcjwtZnVuY3Rpb24oc2FtcGxlX3Jvdyl7XG4gIHJlczwtc2FmZV9zZWxmKHNhbXBsZV9yb3cpXG4gIGlmKGlzLm51bGwocmVzJHJlc3VsdCkpe1xuICAgIHByaW50KFwiaXMgbnVsbFwiKVxuICAgIHJldHVybigpXG4gIH1cbiAgcHJpbnQoXCJwYXNzZWRcIilcbiAgcmV0dXJuKHJlcyRyZXN1bHQpXG59XG5cbnRlc3RtYXA8LW1hcF9kZnIoZGZfd2l0aF9mbGF3LCB+d3JhcHBlcigueCkpXG5cbiNRVWVzdGlvbjogaG93IGRvZXMgbWFwX2RmciBkZWFsIHdpdGggMSBudWxsPyBcbiNBbnN3ZXI6IGRlYWxzIHdlbGwsIHJldHVybnMgYW55d2F5c1xuZGZfd2l0aF9mbGF3PC1kZl9hc19saXN0XG5kZl93aXRoX2ZsYXckYDFgJGNhc2VfbnVtYmVyPU5VTExcbnNhbXBsZV9yb3c8LWRmX2FzX2xpc3QkYDJgXG50ZXN0cmVzdWx0PC1zYWZlX3NlbGYoc2FtcGxlX3JvdylcbmBgYCJ9 -->
-<pre class="r"><code>testiris&lt;-select(head(iris),Sepal.Length, Sepal.Width)
-self&lt;-function(sample_row){
-  person.id&lt;-sample_row$person_id
-  case.number&lt;-sample_row$case_number
-  
-#  print(&quot;entered function&quot;)
-  result&lt;-testiris%&gt;%
-             multiply_by(5)%&gt;%
-             mutate(persid=person.id,casenum=case.number)
-  return (result)
-}
-
-safe_self&lt;-safely(self)
-
-wrapper&lt;-function(sample_row){
-  res&lt;-safe_self(sample_row)
-  if(is.null(res$result)){
-    print(&quot;is null&quot;)
-    return()
-  }
-  print(&quot;passed&quot;)
-  return(res$result)
-}
-
-testmap&lt;-map_dfr(df_with_flaw, ~wrapper(.x))
-
-#QUestion: how does map_dfr deal with 1 null? 
-#Answer: deals well, returns anyways
-df_with_flaw&lt;-df_as_list
-df_with_flaw$`1`$case_number=NULL
-sample_row&lt;-df_as_list$`2`
-testresult&lt;-safe_self(sample_row)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Test processing events_docs with jsonlite Findings: json_fromfile is the same as json_fromurl Either way i do it, should probably do the http request just so I can check status</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3Rlc3Qgd2l0aCByZWFkaW5nIGZyb20gZmlsZVxuanNvbl9mcm9tZmlsZTwtZnJvbUpTT04odHh0PWZpbGVuYW1lKVxuI2EgbGlzdCBkZmh5YnJpZFxuanNvbl9kZjwtanNvbl9mcm9tZmlsZSRFdmVudExpc3QgI2EgZGF0YWZyYW1lXG5uYW1lcyhqc29uX2RmJFBhcnR5TGlzdFsxXSlcblxuIyAjdGVzdCB3aXRoIHJlYWRpbmcgZnJvbSB1cmxcbiMgcmVxdWVzdF90eXBlPVwiZXZlbnRzX2FuZF9kb2N1bWVudHNcIlxuIyBjYXNlbnVtYmVyPC1cIjE2MDAwMzMzQ0YxMEFcIlxuIyBqc29uX2Zyb211cmw8LWZyb21KU09OKHR4dD1wYXN0ZTAodXJsX2Jyb3dhcmQsJ2Nhc2UvJyxjYXNlbnVtYmVyLCcvJyxyZXF1ZXN0X3R5cGUsJy5qc29uP2F1dGhfa2V5PScsa2V5KSlcbiNqdXN0IG5lZWQgdGhlIGRlc2NyaXB0aW9uIG9mIGVhY2ggZXZlbnQsIGRvbid0IG5lZWQgYW55dGhpbmcgZWxzZVxuI2Zyb20gY29tbWFuZCBwcmludChldmVudGxpc3QkRXZlbnRMaXN0KTogZWFjaCBlbGVtZW50IG9mIGV2ZW50bGlzdCRFdmVudExpc3QgaGFzICRFdmVudERhdGUsICREZXNjcmlwdGlvbiwgJEV2ZW50QW1vdW50LCAkQWRkaXRpb25hbFRleHQsICRQYXJ0eUxpc3QsICRQYXJ0eTJMaXN0LCAkQ2F1c2VMaXN0LCBcbiMkRXZlbnREb2N1bWVudExpc3QsICRFdmVudERvY3VtZW50TGlzdCROYW1lLCAkRXZlbnREb2N1bWVudExpc3QkUGFnZSwgJGV2ZW50RG9jdW1lbnQkQ29uZmlkZW50aWFsXG5cbmBgYCJ9 -->
-<pre class="r"><code>#test with reading from file
-json_fromfile&lt;-fromJSON(txt=filename)
-#a list dfhybrid
-json_df&lt;-json_fromfile$EventList #a dataframe
-names(json_df$PartyList[1])
-
-# #test with reading from url
-# request_type=&quot;events_and_documents&quot;
-# casenumber&lt;-&quot;16000333CF10A&quot;
-# json_fromurl&lt;-fromJSON(txt=paste0(url_broward,'case/',casenumber,'/',request_type,'.json?auth_key=',key))
-#just need the description of each event, don't need anything else
-#from command print(eventlist$EventList): each element of eventlist$EventList has $EventDate, $Description, $EventAmount, $AdditionalText, $PartyList, $Party2List, $CauseList, 
-#$EventDocumentList, $EventDocumentList$Name, $EventDocumentList$Page, $eventDocument$Confidential
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Test processing crim_dispositions with jsonlite package</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGlzcDwtZ2V0X2RhdGEoY2FzZW51bSxyZXF1ZXN0LFwianNvblwiKVxuZmlsZW5hbWU9d3JpdGVUb1N5c3RlbShkaXNwLGNhc2VudW0scmVxdWVzdCxcImpzb25cIilcbmpzb25fc3RyaW5nPC1mcm9tSlNPTih0eHQ9ZmlsZW5hbWUpXG5cbmpzb25fZGY8LWpzb25fc3RyaW5nJENoYXJnZURpc3Bvc2l0aW9uTGlzdFxuZGlzcG9fZGY8LXNlbGVjdChqc29uX2RmLENoYXJnZSxPZmZlbnNlX0RhdGUsRGlzcG9zaXRpb25MaXN0KVxuZGlzcHM8LWpzb25fZGYkRGlzcG9zaXRpb25MaXN0XG5WaWV3KGRpc3BzKVxuI2xpc3RvbGlzdHM8LXNlbGVjdChqc29uX2RmLERpc3Bvc2l0aW9uTGlzdCxQbGVhTGlzdCxTZW50ZW5jZUxpc3QpXG5saXN0ZWxlbSA8LSBkaXNwcyU+JVxuICAgICAgICAgICAgICAgIGRvLmNhbGwocmJpbmQuZGF0YS5mcmFtZSwgLiklPiVcbiAgICAgICAgICAgICAgICBtdXRhdGUoY2FzZV9udW09anNvbl9zdHJpbmckQ2FzZV9OdW1iZXIsXG4gICAgICAgICAgICAgICAgICAgICAgICNwZXJzb25faWQ9LFxuICAgICAgICAgICAgICAgICAgICAgICBPZmZlbnNlRGF0ZT1qc29uX2RmJE9mZmVuc2VfRGF0ZSxcbiAgICAgICAgICAgICAgICAgICAgICAgQ2hhcmdlPWpzb25fZGYkQ2hhcmdlKVxuVmlldyhsaXN0ZWxlbSlcblxuYGBgIn0= -->
-<pre class="r"><code>disp&lt;-get_data(casenum,request,&quot;json&quot;)
-filename=writeToSystem(disp,casenum,request,&quot;json&quot;)
-json_string&lt;-fromJSON(txt=filename)
-
-json_df&lt;-json_string$ChargeDispositionList
-dispo_df&lt;-select(json_df,Charge,Offense_Date,DispositionList)
-disps&lt;-json_df$DispositionList
-View(disps)
-#listolists&lt;-select(json_df,DispositionList,PleaList,SentenceList)
-listelem &lt;- disps%&gt;%
-                do.call(rbind.data.frame, .)%&gt;%
-                mutate(case_num=json_string$Case_Number,
-                       #person_id=,
-                       OffenseDate=json_df$Offense_Date,
-                       Charge=json_df$Charge)
-View(listelem)
-</code></pre>
+#gets a list hopefully with all the chargeDispositionLists and DispositionLists, all numbered differently
+#lapply(which(names(xmlList[[2]])=='DispositionList'), function(i) xmlList[[2]][[i]])</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Test processing crim_dispositions with xml2 and XML packages Cases for person_id==4: [1] “09024308TI20A” “09057909TI20A” “11020953CF10A” “12017635CF10A” “12019341TI20A” “12074993TI30A” [7] “13002653MM10A” “13004375TC10A” “13005330CF10A” “13010663CF10A” “13011511MM10A” “14012120TC10A” [13] “16000322MM10A” “16000754MM20A”</p>
-<p>12019341TI20A is causing issues Debugging notes: acharge is a list of 7</p>
+<p>FUNCTION NOTES: disp_parser2 takes in a list and returns a dataframe for a SINGLE disposition. Note that each CASE can have multiple CHARGES, and each CHARGE has multiple dispositions. charge_parser2 takes in a list and returns a dataframe for a single CHARGE</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyByZXF1ZXN0PVwiY3JpbV9kaXNwb3NpdGlvbnNcIlxuIyBkaXNwPC1nZXRfZGF0YShjYXNlbnVtLCByZXF1ZXN0LFwieG1sXCIgKVxuIyBmaWxlbmFtZTwtd3JpdGVUb1N5c3RlbShkaXNwLGNhc2VudW0scmVxdWVzdCxcInhtbFwiKVxucGVyc29uLmlkPTRcbiMgY2FzZS5udW1iZXI9XCIxMzAwMDU3MENGMTBBXCIgI3RoaXMgY2FzZSBoYXMgTlVMTCBlbGVtZW50c1xuIyBjYXNlLm51bWJlcj1cIjA5MDgzNzk3VEkzMEFcIiAjdGhpcyBjYXNlIGRvZXNuJ3QgaGF2ZSBOVUxMc1xuI2Nhc2UubnVtYmVyPVwiMTEwMjA5NTNDRjEwQVwiXG5jYXNlLm51bWJlcj1cIjEyMDE5MzQxVEkyMEFcIiAjcHJvYmxlbSBjYXNlIGZvciBwZXJzb25faWQ9PTRcbmZpbGVuYW1lPC1wYXN0ZTAoXCJDOi9Vc2Vycy9DYXJvbGluZSBXYW5nL09uZURyaXZlL0R1a2UvQ3JpbWluYWwgUmVjaWRpdmlzbS9kaXNwc19kYXRhL1wiLGNhc2UubnVtYmVyLFwiY3JpbV9kaXNwb3NpdGlvbnMudHh0X3htbFwiKVxueG1sTGlzdDwtZmlsZW5hbWUlPiVcbiAgICAgICAgICAgIHJlYWRfeG1sKCklPiVcbiAgICAgICAgICAgIHhtbFRyZWVQYXJzZSU+JVxuICAgICAgICAgICAgdXNlX3Nlcmllcyhkb2MpJT4lXG4gICAgICAgICAgICB1c2Vfc2VyaWVzKGNoaWxkcmVuKSU+JVxuICAgICAgICAgICAgdXNlX3NlcmllcyhzdHJpbmcpJT4lXG4gICAgICAgICAgICB4bWxUb0xpc3QlPiVcbiAgICAgICAgICAgIHhtbFBhcnNlJT4lXG4gICAgICAgICAgICB4bWxUb0xpc3RcbiMgeG1sX2NoYXJnZURpc3BMaXN0PC14bWxMaXN0JENoYXJnZURpc3Bvc2l0aW9uTGlzdFxuI2Rpc3BsaXN0PC0geG1sX2NoYXJnZURpc3BMaXN0JERpc3Bvc2l0aW9uTGlzdFxuaXNOQT1GQUxTRSAjd2hlbiBpbnNlcnRpbmcgaW50byBmdW5jdGlvbiBsYXRlciwgYmUgY2FyZWZ1bCB3aGVyZSB5b3UgcHV0IGl0XG4jc2hvdWxkIGJlIHJlc2V0IHRvIEYgd2hlbmV2ZXIgd2UgbW92ZSBvbnRvIGEgbmV3IGNhc2UgXG5jaGFyZ2VfcGFyc2VyPC1mdW5jdGlvbihhY2hhcmdlLGNhc2UubnVtYmVyLHBlcnNvbi5pZCl7XG4gICAjIHByaW50KGFjaGFyZ2UpXG4gICMgcHJpbnQoY2FzZS5udW1iZXIpXG4gICMgcHJpbnQocGVyc29uLmlkKVxuICAjIGNoYXJnZV93aXRoX251bGw8PC1hY2hhcmdlJERpc3Bvc2l0aW9uTGlzdFxuICBhY2hhcmdlPDwtYWNoYXJnZVxuICBpZihpcy5udWxsKGFjaGFyZ2UkRGlzcG9zaXRpb25MaXN0KSl7XG4gICAgaXNOQTw8LVRSVUVcbiAgICBwcmludChcImlzbnVsbFwiKVxuICAgIHJldHVybihOQSlcbiAgfVxuICBcbiAgZGlzcF9mcmFtZTwtYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QlPiVcbiAgICAgICAgICAgICAgICMgcHJpbnQoKSU+JVxuICAgICAgICAgICAgICB1bmxpc3QoKSU+JVxuICAjICAgICAgICAgICAgICMgcHJpbnQoKSU+JVxuICAgICAgICAgICAgICBtYXRyaXgobnJvdz0xLGJ5cm93PVQpJT4lXG4gICAgICAgICAgICAgIGRhdGEuZnJhbWUoc3RyaW5nc0FzRmFjdG9ycz1GKVxuICBkaXNwX2ZyYW1lPC1tdXRhdGUoZGlzcF9mcmFtZSxjYXNlX251bWJlcj1jYXNlLm51bWJlcixcbiAgICAgICAgICAgICAgcGVyc29uX2lkPXBlcnNvbi5pZCxcbiAgICAgICAgICAgICAgT2ZmZW5zZURhdGU9YWNoYXJnZSRPZmZlbnNlX0RhdGUsXG4gICAgICAgICAgICAgIENoYXJnZT1hY2hhcmdlJENoYXJnZSlcbn1cbnJlbW92ZU5BX21hdHJpeENvbDwtZnVuY3Rpb24obWF0cml4KXtcbiAgaWYoaXNOQT09VCl7XG4gICAgcHJpbnQoXCJpc05BPT1UXCIpXG4gICAgcmV0dXJuKG1hdHJpeFtjb2xTdW1zKCFpcy5uYShtYXRyaXgpKT4wXSlcbiAgfVxuICByZXR1cm4obWF0cml4KVxufVxuZGVidWcoY2hhcmdlX3BhcnNlcilcbnhtbF9kZjwtc2FwcGx5KHhtbExpc3RbLTFdLGNoYXJnZV9wYXJzZXIsY2FzZS5udW1iZXIscGVyc29uLmlkKSU+JVxuICAgICAgICAgICAgdCgpXG5gYGAifQ== -->
-<pre class="r"><code># request=&quot;crim_dispositions&quot;
-# disp&lt;-get_data(casenum, request,&quot;xml&quot; )
-# filename&lt;-writeToSystem(disp,casenum,request,&quot;xml&quot;)
-person.id=4
-# case.number=&quot;13000570CF10A&quot; #this case has NULL elements
-# case.number=&quot;09083797TI30A&quot; #this case doesn't have NULLs
-#case.number=&quot;11020953CF10A&quot;
-case.number=&quot;12019341TI20A&quot; #problem case for person_id==4
-filename&lt;-paste0(&quot;C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/disps_data/&quot;,case.number,&quot;crim_dispositions.txt_xml&quot;)
-xmlList&lt;-filename%&gt;%
-            read_xml()%&gt;%
-            xmlTreeParse%&gt;%
-            use_series(doc)%&gt;%
-            use_series(children)%&gt;%
-            use_series(string)%&gt;%
-            xmlToList%&gt;%
-            xmlParse%&gt;%
-            xmlToList
-# xml_chargeDispList&lt;-xmlList$ChargeDispositionList
-#displist&lt;- xml_chargeDispList$DispositionList
-isNA=FALSE #when inserting into function later, be careful where you put it
-#should be reset to F whenever we move onto a new case 
-charge_parser&lt;-function(acharge,case.number,person.id){
-   # print(acharge)
-  # print(case.number)
-  # print(person.id)
-  # charge_with_null&lt;&lt;-acharge$DispositionList
-  acharge&lt;&lt;-acharge
-  if(is.null(acharge$DispositionList)){
-    isNA&lt;&lt;-TRUE
-    print(&quot;isnull&quot;)
-    return(NA)
-  }
-  
-  disp_frame&lt;-acharge$DispositionList%&gt;%
-               # print()%&gt;%
-              unlist()%&gt;%
-  #             # print()%&gt;%
-              matrix(nrow=1,byrow=T)%&gt;%
-              data.frame(stringsAsFactors=F)
-  disp_frame&lt;-mutate(disp_frame,case_number=case.number,
-              person_id=person.id,
-              OffenseDate=acharge$Offense_Date,
-              Charge=acharge$Charge)
-}
-removeNA_matrixCol&lt;-function(matrix){
-  if(isNA==T){
-    print(&quot;isNA==T&quot;)
-    return(matrix[colSums(!is.na(matrix))&gt;0])
-  }
-  return(matrix)
-}
-debug(charge_parser)
-xml_df&lt;-sapply(xmlList[-1],charge_parser,case.number,person.id)%&gt;%
-            t()</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiZGVidWdnaW5nIGluOiBGVU4oWFtbaV1dLCAuLi4pXG5kZWJ1ZyBhdCAjMToge1xuICAgIGFjaGFyZ2UgPDwtIGFjaGFyZ2VcbiAgICBpZiAoaXMubnVsbChhY2hhcmdlJERpc3Bvc2l0aW9uTGlzdCkpIHtcbiAgICAgICAgaXNOQSA8PC0gVFJVRVxuICAgICAgICBwcmludChcImlzbnVsbFwiKVxuICAgICAgICByZXR1cm4oTkEpXG4gICAgfVxuICAgIGRpc3BfZnJhbWUgPC0gYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QgJT4lIHVubGlzdCgpICU+JSBtYXRyaXgobnJvdyA9IDEsIFxuICAgICAgICBieXJvdyA9IFQpICU+JSBkYXRhLmZyYW1lKHN0cmluZ3NBc0ZhY3RvcnMgPSBGKVxuICAgIGRpc3BfZnJhbWUgPC0gbXV0YXRlKGRpc3BfZnJhbWUsIGNhc2VfbnVtYmVyID0gY2FzZS5udW1iZXIsIFxuICAgICAgICBwZXJzb25faWQgPSBwZXJzb24uaWQsIE9mZmVuc2VEYXRlID0gYWNoYXJnZSRPZmZlbnNlX0RhdGUsIFxuICAgICAgICBDaGFyZ2UgPSBhY2hhcmdlJENoYXJnZSlcbn1cbiJ9 -->
-<pre><code>debugging in: FUN(X[[i]], ...)
-debug at #1: {
-    acharge &lt;&lt;- acharge
-    if (is.null(acharge$DispositionList)) {
-        isNA &lt;&lt;- TRUE
-        print(&quot;isnull&quot;)
-        return(NA)
-    }
-    disp_frame &lt;- acharge$DispositionList %&gt;% unlist() %&gt;% matrix(nrow = 1, 
-        byrow = T) %&gt;% data.frame(stringsAsFactors = F)
-    disp_frame &lt;- mutate(disp_frame, case_number = case.number, 
-        person_id = person.id, OffenseDate = acharge$Offense_Date, 
-        Charge = acharge$Charge)
-}</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuMFxuYGBgIn0= -->
-<pre class="r"><code>0</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDBcbmRlYnVnIGF0ICM2OiBhY2hhcmdlIDw8LSBhY2hhcmdlXG5kZWJ1ZyBhdCAjNzogaWYgKGlzLm51bGwoYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QpKSB7XG4gICAgaXNOQSA8PC0gVFJVRVxuICAgIHByaW50KFwiaXNudWxsXCIpXG4gICAgcmV0dXJuKE5BKVxufVxuZGVidWcgYXQgIzEzOiBkaXNwX2ZyYW1lIDwtIGFjaGFyZ2UkRGlzcG9zaXRpb25MaXN0ICU+JSB1bmxpc3QoKSAlPiUgbWF0cml4KG5yb3cgPSAxLCBcbiAgICBieXJvdyA9IFQpICU+JSBkYXRhLmZyYW1lKHN0cmluZ3NBc0ZhY3RvcnMgPSBGKVxuZGVidWcgYXQgIzIxOiBkaXNwX2ZyYW1lIDwtIG11dGF0ZShkaXNwX2ZyYW1lLCBjYXNlX251bWJlciA9IGNhc2UubnVtYmVyLCBwZXJzb25faWQgPSBwZXJzb24uaWQsIFxuICAgIE9mZmVuc2VEYXRlID0gYWNoYXJnZSRPZmZlbnNlX0RhdGUsIENoYXJnZSA9IGFjaGFyZ2UkQ2hhcmdlKVxuZXhpdGluZyBmcm9tOiBGVU4oWFtbaV1dLCAuLi4pXG5kZWJ1Z2dpbmcgaW46IEZVTihYW1tpXV0sIC4uLilcbmRlYnVnIGF0ICMxOiB7XG4gICAgYWNoYXJnZSA8PC0gYWNoYXJnZVxuICAgIGlmIChpcy5udWxsKGFjaGFyZ2UkRGlzcG9zaXRpb25MaXN0KSkge1xuICAgICAgICBpc05BIDw8LSBUUlVFXG4gICAgICAgIHByaW50KFwiaXNudWxsXCIpXG4gICAgICAgIHJldHVybihOQSlcbiAgICB9XG4gICAgZGlzcF9mcmFtZSA8LSBhY2hhcmdlJERpc3Bvc2l0aW9uTGlzdCAlPiUgdW5saXN0KCkgJT4lIG1hdHJpeChucm93ID0gMSwgXG4gICAgICAgIGJ5cm93ID0gVCkgJT4lIGRhdGEuZnJhbWUoc3RyaW5nc0FzRmFjdG9ycyA9IEYpXG4gICAgZGlzcF9mcmFtZSA8LSBtdXRhdGUoZGlzcF9mcmFtZSwgY2FzZV9udW1iZXIgPSBjYXNlLm51bWJlciwgXG4gICAgICAgIHBlcnNvbl9pZCA9IHBlcnNvbi5pZCwgT2ZmZW5zZURhdGUgPSBhY2hhcmdlJE9mZmVuc2VfRGF0ZSwgXG4gICAgICAgIENoYXJnZSA9IGFjaGFyZ2UkQ2hhcmdlKVxufVxuZGVidWcgYXQgIzY6IGFjaGFyZ2UgPDwtIGFjaGFyZ2VcbmRlYnVnIGF0ICM3OiBpZiAoaXMubnVsbChhY2hhcmdlJERpc3Bvc2l0aW9uTGlzdCkpIHtcbiAgICBpc05BIDw8LSBUUlVFXG4gICAgcHJpbnQoXCJpc251bGxcIilcbiAgICByZXR1cm4oTkEpXG59XG5kZWJ1ZyBhdCAjMTM6IGRpc3BfZnJhbWUgPC0gYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QgJT4lIHVubGlzdCgpICU+JSBtYXRyaXgobnJvdyA9IDEsIFxuICAgIGJ5cm93ID0gVCkgJT4lIGRhdGEuZnJhbWUoc3RyaW5nc0FzRmFjdG9ycyA9IEYpXG5kZWJ1ZyBhdCAjMjE6IGRpc3BfZnJhbWUgPC0gbXV0YXRlKGRpc3BfZnJhbWUsIGNhc2VfbnVtYmVyID0gY2FzZS5udW1iZXIsIHBlcnNvbl9pZCA9IHBlcnNvbi5pZCwgXG4gICAgT2ZmZW5zZURhdGUgPSBhY2hhcmdlJE9mZmVuc2VfRGF0ZSwgQ2hhcmdlID0gYWNoYXJnZSRDaGFyZ2UpXG5leGl0aW5nIGZyb206IEZVTihYW1tpXV0sIC4uLilcbiJ9 -->
-<pre><code>[1] 0
-debug at #6: acharge &lt;&lt;- acharge
-debug at #7: if (is.null(acharge$DispositionList)) {
-    isNA &lt;&lt;- TRUE
-    print(&quot;isnull&quot;)
-    return(NA)
-}
-debug at #13: disp_frame &lt;- acharge$DispositionList %&gt;% unlist() %&gt;% matrix(nrow = 1, 
-    byrow = T) %&gt;% data.frame(stringsAsFactors = F)
-debug at #21: disp_frame &lt;- mutate(disp_frame, case_number = case.number, person_id = person.id, 
-    OffenseDate = acharge$Offense_Date, Charge = acharge$Charge)
-exiting from: FUN(X[[i]], ...)
-debugging in: FUN(X[[i]], ...)
-debug at #1: {
-    acharge &lt;&lt;- acharge
-    if (is.null(acharge$DispositionList)) {
-        isNA &lt;&lt;- TRUE
-        print(&quot;isnull&quot;)
-        return(NA)
-    }
-    disp_frame &lt;- acharge$DispositionList %&gt;% unlist() %&gt;% matrix(nrow = 1, 
-        byrow = T) %&gt;% data.frame(stringsAsFactors = F)
-    disp_frame &lt;- mutate(disp_frame, case_number = case.number, 
-        person_id = person.id, OffenseDate = acharge$Offense_Date, 
-        Charge = acharge$Charge)
-}
-debug at #6: acharge &lt;&lt;- acharge
-debug at #7: if (is.null(acharge$DispositionList)) {
-    isNA &lt;&lt;- TRUE
-    print(&quot;isnull&quot;)
-    return(NA)
-}
-debug at #13: disp_frame &lt;- acharge$DispositionList %&gt;% unlist() %&gt;% matrix(nrow = 1, 
-    byrow = T) %&gt;% data.frame(stringsAsFactors = F)
-debug at #21: disp_frame &lt;- mutate(disp_frame, case_number = case.number, person_id = person.id, 
-    OffenseDate = acharge$Offense_Date, Charge = acharge$Charge)
-exiting from: FUN(X[[i]], ...)</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuICAgICAgICAgICAgIyBwcmludCgpJT4lXG4gICAgICAgICAgICAjIHJlbW92ZU5BX21hdHJpeENvbCguKVxuICAgICAgICAgICAgIyBhcy5kYXRhLmZyYW1lKHJvdy5uYW1lcz1OVUxMLHN0cmluZ3NBc0ZhY3RvcnM9RilcbiAgICAgICAgICAgICMgbWFwX2RmKHVubGlzdCkgXG4gICAgICAgICAgICBcbiNjb2wxPC1hcy5jaGFyYWN0ZXIoeG1sX2RmJGMuLjAxLjA4LjIwMTAuLi4uY29udmljdGVkLmJ5LlBsZWEuLi5BZGp1ZGljYXRlZC4uKVxuI3Rlc3RkZjwtZGF0YS5mcmFtZShtYXRyaXgodW5saXN0KGRpc3BsaXN0KSwgbnJvdz0xLCBieXJvdz1UKSxzdHJpbmdzQXNGYWN0b3JzPUZBTFNFKVxuI3RpYmJsZTwtIGFzX2RhdGFfZnJhbWUodW5saXN0KGRpc3BsaXN0KSlcblZpZXcoY2hhcmdlX3BhcnNlcihhY2hhcmdlLGNhc2UubnVtYmVyLHBlcnNvbi5pZCkpXG5gYGAifQ== -->
-<pre class="r"><code>            # print()%&gt;%
-            # removeNA_matrixCol(.)
-            # as.data.frame(row.names=NULL,stringsAsFactors=F)
-            # map_df(unlist) 
-            
-#col1&lt;-as.character(xml_df$c..01.08.2010....convicted.by.Plea...Adjudicated..)
-#testdf&lt;-data.frame(matrix(unlist(displist), nrow=1, byrow=T),stringsAsFactors=FALSE)
-#tibble&lt;- as_data_frame(unlist(displist))
-View(charge_parser(acharge,case.number,person.id))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiZGVidWdnaW5nIGluOiBjaGFyZ2VfcGFyc2VyKGFjaGFyZ2UsIGNhc2UubnVtYmVyLCBwZXJzb24uaWQpXG5kZWJ1ZyBhdCAjMToge1xuICAgIGFjaGFyZ2UgPDwtIGFjaGFyZ2VcbiAgICBpZiAoaXMubnVsbChhY2hhcmdlJERpc3Bvc2l0aW9uTGlzdCkpIHtcbiAgICAgICAgaXNOQSA8PC0gVFJVRVxuICAgICAgICBwcmludChcImlzbnVsbFwiKVxuICAgICAgICByZXR1cm4oTkEpXG4gICAgfVxuICAgIGRpc3BfZnJhbWUgPC0gYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QgJT4lIHVubGlzdCgpICU+JSBtYXRyaXgobnJvdyA9IDEsIFxuICAgICAgICBieXJvdyA9IFQpICU+JSBkYXRhLmZyYW1lKHN0cmluZ3NBc0ZhY3RvcnMgPSBGKVxuICAgIGRpc3BfZnJhbWUgPC0gbXV0YXRlKGRpc3BfZnJhbWUsIGNhc2VfbnVtYmVyID0gY2FzZS5udW1iZXIsIFxuICAgICAgICBwZXJzb25faWQgPSBwZXJzb24uaWQsIE9mZmVuc2VEYXRlID0gYWNoYXJnZSRPZmZlbnNlX0RhdGUsIFxuICAgICAgICBDaGFyZ2UgPSBhY2hhcmdlJENoYXJnZSlcbn1cbiJ9 -->
-<pre><code>debugging in: charge_parser(acharge, case.number, person.id)
-debug at #1: {
-    acharge &lt;&lt;- acharge
-    if (is.null(acharge$DispositionList)) {
-        isNA &lt;&lt;- TRUE
-        print(&quot;isnull&quot;)
-        return(NA)
-    }
-    disp_frame &lt;- acharge$DispositionList %&gt;% unlist() %&gt;% matrix(nrow = 1, 
-        byrow = T) %&gt;% data.frame(stringsAsFactors = F)
-    disp_frame &lt;- mutate(disp_frame, case_number = case.number, 
-        person_id = person.id, OffenseDate = acharge$Offense_Date, 
-        Charge = acharge$Charge)
-}</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuUVxuVmlldyh4bWxfZGYpXG5gYGAifQ== -->
-<pre class="r"><code>Q
-View(xml_df)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>a second copy of code so I can look at the way my code handles 2 different cases</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGVyc29uLmlkPTRcbmNhc2UubnVtYmVyMj1cIjA5MDgzNzk3VEkzMEFcIiAjdGhpcyBjYXNlIGRvZXNuJ3QgaGF2ZSBOVUxMc1xuXG5maWxlbmFtZTI8LXBhc3RlMChcIkM6L1VzZXJzL0Nhcm9saW5lIFdhbmcvT25lRHJpdmUvRHVrZS9DcmltaW5hbCBSZWNpZGl2aXNtL2Rpc3BzX2RhdGEvXCIsY2FzZS5udW1iZXIyLFwiY3JpbV9kaXNwb3NpdGlvbnMudHh0X3htbFwiKVxueG1sTGlzdDI8LWZpbGVuYW1lMiU+JVxuICAgICAgICAgICAgcmVhZF94bWwoKSU+JVxuICAgICAgICAgICAgeG1sVHJlZVBhcnNlJT4lXG4gICAgICAgICAgICB1c2Vfc2VyaWVzKGRvYyklPiVcbiAgICAgICAgICAgIHVzZV9zZXJpZXMoY2hpbGRyZW4pJT4lXG4gICAgICAgICAgICB1c2Vfc2VyaWVzKHN0cmluZyklPiVcbiAgICAgICAgICAgIHhtbFRvTGlzdCU+JVxuICAgICAgICAgICAgeG1sUGFyc2UlPiVcbiAgICAgICAgICAgIHhtbFRvTGlzdFxuXG4jIHhtbF9jaGFyZ2VEaXNwTGlzdDwteG1sTGlzdCRDaGFyZ2VEaXNwb3NpdGlvbkxpc3RcbiNkaXNwbGlzdDwtIHhtbF9jaGFyZ2VEaXNwTGlzdCREaXNwb3NpdGlvbkxpc3RcblxuaXNOQT1GQUxTRSAjd2hlbiBpbnNlcnRpbmcgaW50byBmdW5jdGlvbiBsYXRlciwgYmUgY2FyZWZ1bCB3aGVyZSB5b3UgcHV0IGl0XG4jc2hvdWxkIGJlIHJlc2V0IHRvIEYgd2hlbmV2ZXIgd2UgbW92ZSBvbnRvIGEgbmV3IGNhc2UgXG5jaGFyZ2VfcGFyc2VyMjwtZnVuY3Rpb24oYWNoYXJnZSxjYXNlLm51bWJlcixwZXJzb24uaWQpe1xuICBhY2hhcmdlMjw8LWFjaGFyZ2VcbiAgaWYoaXMubnVsbChhY2hhcmdlJERpc3Bvc2l0aW9uTGlzdCkpe1xuICAgIGlzTkE8PC1UUlVFXG4gICAgcHJpbnQoXCJpc251bGxcIilcbiAgICByZXR1cm4oTkEpXG4gIH1cbiAgZGlzcF9mcmFtZTwtYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QlPiVcbiAgICAgICAgICAgICAgICMgcHJpbnQoKSU+JVxuICAgICAgICAgICAgICB1bmxpc3QoKSU+JVxuICAjICAgICAgICAgICAgICMgcHJpbnQoKSU+JVxuICAgICAgICAgICAgICBtYXRyaXgobnJvdz0xLGJ5cm93PVQpJT4lXG5cbiAgICAgICAgICAgICAgZGF0YS5mcmFtZShzdHJpbmdzQXNGYWN0b3JzPUYpXG5cbiAgZGlzcF9mcmFtZTwtbXV0YXRlKGRpc3BfZnJhbWUsY2FzZV9udW1iZXI9Y2FzZS5udW1iZXIsXG4gICAgICAgICAgICAgIHBlcnNvbl9pZD1wZXJzb24uaWQsXG4gICAgICAgICAgICAgIE9mZmVuc2VEYXRlPWFjaGFyZ2UkT2ZmZW5zZV9EYXRlLFxuICAgICAgICAgICAgICBDaGFyZ2U9YWNoYXJnZSRDaGFyZ2UpXG59XG5cbnhtbF9kZjI8LXNhcHBseSh4bWxMaXN0MlstMV0sY2hhcmdlX3BhcnNlcjIsY2FzZS5udW1iZXIyLHBlcnNvbi5pZCklPiVcbiAgICAgICAgICAgIHQoKVxuICAgICAgICAgICAgIyBwcmludCgpJT4lXG4gICAgICAgICAgICAjIHJlbW92ZU5BX21hdHJpeENvbCguKVxuICAgICAgICAgICAgIyBhcy5kYXRhLmZyYW1lKHJvdy5uYW1lcz1OVUxMLHN0cmluZ3NBc0ZhY3RvcnM9RilcbiAgICAgICAgICAgICMgbWFwX2RmKHVubGlzdCkgXG5cbnNhbXBsZWNoYXJnZTE9KGNoYXJnZV9wYXJzZXIoYWNoYXJnZSxjYXNlLm51bWJlcixwZXJzb24uaWQpKVxuc2FtcGxlY2hhcmdlMj0oY2hhcmdlX3BhcnNlcihhY2hhcmdlMixjYXNlLm51bWJlcixwZXJzb24uaWQpKVxuVmlldyh4bWxfZGYpXG5WaWV3KHhtbF9kZjIpXG5cbmBgYCJ9 -->
-<pre class="r"><code>person.id=4
-case.number2=&quot;09083797TI30A&quot; #this case doesn't have NULLs
-
-filename2&lt;-paste0(&quot;C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/disps_data/&quot;,case.number2,&quot;crim_dispositions.txt_xml&quot;)
-xmlList2&lt;-filename2%&gt;%
-            read_xml()%&gt;%
-            xmlTreeParse%&gt;%
-            use_series(doc)%&gt;%
-            use_series(children)%&gt;%
-            use_series(string)%&gt;%
-            xmlToList%&gt;%
-            xmlParse%&gt;%
-            xmlToList
-
-# xml_chargeDispList&lt;-xmlList$ChargeDispositionList
-#displist&lt;- xml_chargeDispList$DispositionList
-
-isNA=FALSE #when inserting into function later, be careful where you put it
-#should be reset to F whenever we move onto a new case 
-charge_parser2&lt;-function(acharge,case.number,person.id){
-  acharge2&lt;&lt;-acharge
-  if(is.null(acharge$DispositionList)){
-    isNA&lt;&lt;-TRUE
-    print(&quot;isnull&quot;)
-    return(NA)
-  }
-  disp_frame&lt;-acharge$DispositionList%&gt;%
-               # print()%&gt;%
-              unlist()%&gt;%
-  #             # print()%&gt;%
-              matrix(nrow=1,byrow=T)%&gt;%
-
-              data.frame(stringsAsFactors=F)
-
-  disp_frame&lt;-mutate(disp_frame,case_number=case.number,
-              person_id=person.id,
-              OffenseDate=acharge$Offense_Date,
-              Charge=acharge$Charge)
-}
-
-xml_df2&lt;-sapply(xmlList2[-1],charge_parser2,case.number2,person.id)%&gt;%
-            t()
-            # print()%&gt;%
-            # removeNA_matrixCol(.)
-            # as.data.frame(row.names=NULL,stringsAsFactors=F)
-            # map_df(unlist) 
-
-samplecharge1=(charge_parser(acharge,case.number,person.id))
-samplecharge2=(charge_parser(acharge2,case.number,person.id))
-View(xml_df)
-View(xml_df2)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxueG1sX2RmMjwtbWFwX2RmKGZpbHRlcmVkX2xpc3QsY2hhcmdlX3BhcnNlcjIsY2FzZS5udW1iZXIyLHBlcnNvbi5pZClcblxuYGBgIn0= -->
+<pre class="r"><code>xml_df2&lt;-map_df(filtered_list,charge_parser2,case.number2,person.id)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Test sapply</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWRkZXI8LWZ1bmN0aW9uKHgsY2hhcmFjKXtcbiAgcHJpbnQoY2hhcmFjKVxuICB4KzNcbn1cbnNhcHBseV90ZXN0PC1zYXBwbHkoMTozLGFkZGVyLFwiYVwiKVxuYGBgIn0= -->
-<pre class="r"><code>adder&lt;-function(x,charac){
-  print(charac)
-  x+3
-}
-sapply_test&lt;-sapply(1:3,adder,&quot;a&quot;)</code></pre>
-<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gbXV0YXRlX2ltcGwoLmRhdGEsIGRvdHMpIDogXG4gIENvbHVtbiBgT2ZmZW5zZURhdGVgIGlzIG9mIHVuc3VwcG9ydGVkIHR5cGUgTlVMTFxuIn0= -->
+<pre><code>Error in mutate_impl(.data, dots) : 
+  Column `OffenseDate` is of unsupported type NULL</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpsb2NhdGlvbjogYi1kYXRhLXF1ZXJ5DQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQoNClRoaXMgaXMgYW4gW1IgTWFya2Rvd25dKGh0dHA6Ly9ybWFya2Rvd24ucnN0dWRpby5jb20pIE5vdGVib29rLiBXaGVuIHlvdSBleGVjdXRlIGNvZGUgd2l0aGluIHRoZSBub3RlYm9vaywgdGhlIHJlc3VsdHMgYXBwZWFyIGJlbmVhdGggdGhlIGNvZGUuIA0KDQpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ3RybCtTaGlmdCtFbnRlciouIA0KDQpgYGB7cn0NCiMgTG9hZCBwYWNrYWdlcw0KbGlicmFyeSh0aWR5dmVyc2UpDQpsaWJyYXJ5KGh0dHIpDQpsaWJyYXJ5KGpzb25saXRlKQ0KbGlicmFyeSh4bWwyKQ0KbGlicmFyeShYTUwpDQpsaWJyYXJ5KG1hZ3JpdHRyKQ0KYGBgDQoNCkV2ZG9jcyBmYWlsZWQgMTYgdGltZXMgZHVlIHRvIFs1MDBdIGVycm9yIG9uIGZpcnN0IDEwLDAwMCByZXF1ZXN0cyANCjE4IGZhaWx1cmVzIG9uICAxMCwwMDAtMjAsMDAwDQo0NiBmYWlsdXJlcyBvbiAyMCwwMDAtNDAsMDAwDQo2NiBmYWlsdXJlcyBvbiA0MCwwMDAtODAsMDAwDQpCcm93YXJkIGNvdW50eSB1c2VybmFtZS9wYXNzd29yazogY2x3NzQNCkR1a2VAMTIzNA0KDQpgYGB7cn0NCmxvb3BkZjwtcmVhZC5jc3YoZmlsZT0iRGF0YSB0YWJsZXMvbG9vcGRmLmNzdiIpIA0KI2xvb3BkZjwtc2VsZWN0KGxvb3BkZiwgcGVyc29uX2lkLCBjYXNlX251bWJlcikNCg0Kc2FtcGxlPC1zbGljZShsb29wZGYsNDAwMDA6bigpKQ0KI3NhbXBsZTwtbG9vcGRmDQpzYW1wbGUkY2FzZV9udW1iZXI8LWFzLmNoYXJhY3RlcihzYW1wbGUkY2FzZV9udW1iZXIpDQpzYW1wbGUkcGVyc29uX2lkPC1hcy5udW1lcmljKHNhbXBsZSRwZXJzb25faWQpDQpkZl9hc19saXN0PC1zYW1wbGUlPiUNCiAgICAgICAgICAgICAgc3BsaXQoc2VxKG5yb3coLikpKSU+JQ0KICAgICAgICAgICAgICBsYXBwbHkoYXMudmVjdG9yKQ0KYGBgDQoNCg0KUXVlcnlpbmcgZGF0YSBmb3IgZXZlbnRzIGFuZCBkb2N1bWVudHMgKHVzZWQgZm9yIGZhaWx1cmUgdG8gYXBwZWFyKQ0KUFJPQkxFTTogZmluZCBjYXNlIHdpdGggbG90cyBvZiBjaGFyZ2VzLCBzZWUgaWYgMm5kIHBhZ2UgaXMgZ2VuZXJhdGVkIA0KYGBge3J9DQpzZXR3ZCgiQzovVXNlcnMvQ2Fyb2xpbmUgV2FuZy9PbmVEcml2ZS9EdWtlL0NyaW1pbmFsIFJlY2lkaXZpc20vYnJvd2FyZC1kYXRhLXF1ZXJ5L2V2ZW50c19kb2NzX2RhdGEiKQ0KI3NvIHRoYXQgd3JpdGVUb1N5c3RlbSB3cml0ZXMgdG8gY29ycmVjdCBwbGFjZQ0KDQpwYiA8LSBwcm9ncmVzc19lc3RpbWF0ZWQobGVuZ3RoKHNhbXBsZSRjYXNlX251bWJlcikpDQpldmVudHNkb2NzX2RmPC1tYXBfZGZyKGRmX2FzX2xpc3QsIH53cmFwcGVyKC54LCJldmVudHNfYW5kX2RvY3VtZW50cyIsImpzb24iKSkNCg0KYGBgDQoNCmBgYHtyfQ0Kc2V0d2QoIkM6L1VzZXJzL0Nhcm9saW5lIFdhbmcvT25lRHJpdmUvRHVrZS9DcmltaW5hbCBSZWNpZGl2aXNtL2Jyb3dhcmQtZGF0YS1xdWVyeS9ldmVudHNfZG9jc19kYXRhIikNCiNzbyB0aGF0IHdyaXRlVG9TeXN0ZW0gd3JpdGVzIHRvIGNvcnJlY3QgcGxhY2UNCg0KZXZlbnRzZGVzY3JwX2RmPC1zZWxlY3QoZXZlbnRzZG9jc19kZiwgcGVyc29uX2lkLGNhc2VfbnVtLEV2ZW50RGF0ZSxEZXNjcmlwdGlvbixFdmVudEFtb3VudCxBZGRpdGlvbmFsVGV4dCkNCndyaXRlLmNzdihldmVudHNkZXNjcnBfZGYsInNhbXBsZV9ldmVudHNkZXNjcnBfZGY0LmNzdiIpDQogcm0oZXZlbnRzZGVzY3JwX2RmKQ0KIHJtKGV2ZW50c2RvY3NfZGYpDQoNCmBgYA0KDQoNCg0KDQoNCg0KDQpRdWVyeWluZyBkYXRhIGZvciBkaXNwb3NpdGlvbnMgKGZvciBjb252aWN0aW9ucykNCmBgYHtyfQ0Kc2V0d2QoIkM6L1VzZXJzL0Nhcm9saW5lIFdhbmcvT25lRHJpdmUvRHVrZS9DcmltaW5hbCBSZWNpZGl2aXNtL2Jyb3dhcmQtZGF0YS1xdWVyeS9kaXNwc19kYXRhIikNCiNzbyB0aGF0IHdyaXRlVG9TeXN0ZW0gd3JpdGVzIHRvIGNvcnJlY3QgcGxhY2UNCg0KcGIgPC0gcHJvZ3Jlc3NfZXN0aW1hdGVkKGxlbmd0aChzYW1wbGUkY2FzZV9udW1iZXIpKQ0KZGlzcG9zaXRpb25zX2RmPC1tYXBfZGZyKGRmX2FzX2xpc3QsIH53cmFwcGVyKC54LCJjcmltX2Rpc3Bvc2l0aW9ucyIsInhtbCIpKQ0KDQpgYGANCg0KYGBge3J9DQpzZXR3ZCgiQzovVXNlcnMvQ2Fyb2xpbmUgV2FuZy9PbmVEcml2ZS9EdWtlL0NyaW1pbmFsIFJlY2lkaXZpc20vYnJvd2FyZC1kYXRhLXF1ZXJ5L2Rpc3BzX2RhdGEiKQ0KI3NvIHRoYXQgd3JpdGVUb1N5c3RlbSB3cml0ZXMgdG8gY29ycmVjdCBwbGFjZQ0KDQpkaXNwb3NpdGlvbnNfZGY8LXJlbmFtZShkaXNwb3NpdGlvbnNfZGYsIEp1ZGdlbWVudERhdGU9WDEsRGVzY3JpcHRpb249WDIpDQp3cml0ZS5jc3YoZGlzcG9zaXRpb25zX2RmLCJmaW5hbF9kaXNwX2RmLmNzdiIpDQpybShkaXNwb3NpdGlvbnNfZGYpDQpgYGANCg0KDQoNCg0KKipGVU5DVElPTlMqKg0KKndyYXBwZXIoKSogdXNlcyBhbGwgdGhlIGZ1bmN0aW9ucyBzcGVjaWZpZWQgYmVsb3cgdG8gbWFrZSBjYWxsIHRvIEJyb3dhcmQgQ2xlcmsncyBPZmZpY2Ugc2l0ZSwgd3JpdGUgdGhlIGRhdGEgc3RyaW5nIHRvIHRoZSBzeXN0ZW0sIGFuZCBwcm9jZXNzIGl0IGludG8gYSBkYXRhZnJhbWUuIFdyYXBwZWQgdGhlIHNhZmVseSAndmVyc2lvbicgb2YgYXBpX2NhbGwgdG8gcHJvY2VzcyB0aGUgbGlzdCByZXN1bHQgKHJldHVybmVkIGJ5IHNhZmVfYXBpX2NhbGwpIGludG8gYSBkYXRhZnJhbWUuIA0KIA0KYGBge3J9DQphcGlfY2FsbDwtZnVuY3Rpb24oc2FtcGxlX3JvdyxyZXF1ZXN0LGRhdGFfdHlwZSl7DQogIG9wdGlvbnMoZXJyb3I9cmVjb3ZlcikNCiAgcGIkdGljaygpJHByaW50KCkNCiAgDQojICBTeXMuc2xlZXAoc2FtcGxlKHNlcSgwLjUsIDIuNSwgMC41KSwgMSkpICN0aW1lIGRlbGF5IGJldHdlZW4gY2FsbHMNCiAgDQogIHBlcnNvbi5pZDwtc2FtcGxlX3JvdyRwZXJzb25faWQNCiAgY2FzZS5udW1iZXI8LXNhbXBsZV9yb3ckY2FzZV9udW1iZXINCiAgZGF0YTwtZ2V0X2RhdGEoY2FzZS5udW1iZXIgLHJlcXVlc3QsZGF0YV90eXBlKQ0KICBmaWxlbmFtZTwtd3JpdGVUb1N5c3RlbShkYXRhLGNhc2UubnVtYmVyLHBhc3RlKHJlcXVlc3QsIi50eHQiLHNlcD0iIiksZGF0YV90eXBlKSAjc2F2ZXMgZmlsZSB0byBzeXN0ZW0gdXNpbmcgY2FzZW51bSBhbmQgcmVxdWVzdCB0eXBlIGluIHRoZSBuYW1lOyByZXR1cm5zIGZpbGVuYW1lDQogIA0KICBpZiAoZGF0YV90eXBlPT0ianNvbiIpew0KICAgIGpzb25fZnJvbWZpbGU8LWZyb21KU09OKHR4dD1maWxlbmFtZSkNCiAgICNhIGxpc3QgZGYgaHlicmlkDQogICAganNvbl9kZjwtanNvbl9hc19kZihqc29uX2Zyb21maWxlLGNhc2UubnVtYmVyLHBlcnNvbi5pZCkNCiAgICByZXR1cm4oanNvbl9kZikNCiAgfQ0KICBlbHNlIGlmIChkYXRhX3R5cGU9PSJ4bWwiKXsNCiAgICB4bWxfZGY8LXhtbF9hc19kZihmaWxlbmFtZSxjYXNlLm51bWJlcixwZXJzb24uaWQpDQogIH0NCn0NCg0Kc2FmZV9hcGlfY2FsbDwtc2FmZWx5KGFwaV9jYWxsKQ0KDQp3cmFwcGVyPC1mdW5jdGlvbihzYW1wbGVfcm93LHJlcXVlc3QsZGF0YV90eXBlKXsNCiAgb3B0aW9ucyhlcnJvcj1yZWNvdmVyKQ0KICByZXM8LXNhZmVfYXBpX2NhbGwoc2FtcGxlX3JvdyxyZXF1ZXN0LGRhdGFfdHlwZSkNCiAgaWYoaXMubnVsbChyZXMkcmVzdWx0KSl7DQogICAgcmV0dXJuKCkNCiAgfQ0KICByZXR1cm4ocmVzJHJlc3VsdCkNCn0NCg0KYGBgDQoNCipnZXRfZGF0YSogcmV0dXJucyBhIGpzb24veG1sIHN0cmluZyBmcm9tIHRoZSBCcm93YXJkIENsZXJrJ3Mgd2Vic2l0ZSB0aHJvdWdoIEhUVFAgR0VUIHJlcXVlc3QNCip3cml0ZVRvU3lzdGVtKiB0YWtlcyBhIGpzb24gSFRUUCByZXNwb25zZSBhbmQgc2F2ZXMgaXQgYXMgLnR4dCBmaWxlIA0KYSAidm9pZCIgZnVuY3Rpb24sIGJ1dCBwcmludHMgdGhlIGZpbGVuYW1lDQoqZGF0YV9hc19kZiogcHJvY2Vzc2VzIGpzb24veG1sIHN0cmluZyBpbnRvIGEgZGF0YWZyYW1lIA0KKGRpZmZlcmVudCBwcm9jZXNzaW5nIG5lZWRlZCBmb3IgZXZlbnRzX2RvY3MgYW5kIGNyaW1fZGlzcG9zaXRpb25zKQ0KKmNoYXJnZV9wYXJzZXIqIGlzIGEgaGVscGVyIGZ1bmN0aW9uIGZvciB4bWxfYXNfZGYNCg0KYGBge3J9DQpnZXRfZGF0YTwtZnVuY3Rpb24oY2FzZW51bWJlcixyZXF1ZXN0X3R5cGUsIGRhdGFfdHlwZSl7DQogIHVybF9icm93YXJkPC0iaHR0cHM6Ly9hcGkuYnJvd2FyZGNsZXJrLm9yZy9hcGkvIg0KICBrZXk8LSJMbzVNdDZFRUpJd0RJTHZwdXNJdHl2RG50THNMcU13dU1HenJ2TEZEc0t6RHNueXBxdUkzSkQ2Q0xLb29wTHh3dm55cHR0Q0tFcUduR3M2c0Y5RUtGbnIyMXFENE1KRm52RXdvdkR3cXRwNzNuekN0eUVHekpyc3k4SzRyc0Q5dEZFR3ZLcDhwc3BFeXhyR3cwb3h0RUYySEZvRDFLckhHR0V4dHRESEpDRjJ5ejF6b0R1RHhucHhudXdzSm84cks3SDFHc3BHR0l4eEZ6dERMdXREeXFIR0RydkYzc0hKc3l4d3pMQ3dESm5NQ25NdzNDTXNIdnpyTEVLIg0KICB1cmw9cGFzdGUwKHVybF9icm93YXJkLCdjYXNlLycsY2FzZW51bWJlciwnLycscmVxdWVzdF90eXBlLCcuJyxkYXRhX3R5cGUsJz9hdXRoX2tleT0nLGtleSkNCiMgIHByaW50KHVybCkNCiAgZXZlbnRzZG9jczwtUkVUUlkoIkdFVCIsIHVybCx0aW1lcz01KQ0KICAgICNyZXRyaWVzIHVudGlsIGh0dHBfZXJyb3IgKGJvb2xlYW4pIHJldHVybnMgZmFsc2U7IHRydWUgaWYgc3RhdHVzIGNvZGUgaXMgNDAwKw0KICAgICNyZXRyaWVzIG1heCBvZiA1eDsgMSBzZWMgcGF1c2VzIGJldHdlZW4gdHJpZXMNCiAgcmV0dXJuKGV2ZW50c2RvY3MpICNyIGF1dG9tYXRpY2FsbHkgcmV0dXJucyBsYXN0IGxpbmUgYnV0IHdlJ2xsIGV4cGxpY2l0bHkgcmV0dXJuIHRoaXMgaGVyZQ0KfQ0KDQp3cml0ZVRvU3lzdGVtPC1mdW5jdGlvbih3ZWJfcmVzcG9uc2UsY2FzZW51bWJlciwgZmlsZXR5cGUsZGF0YV90eXBlKXsNCiAgZmlsZW5hbWU9cGFzdGUoY2FzZW51bWJlcixmaWxldHlwZSwiXyIsZGF0YV90eXBlLCBzZXA9IiIpDQogIHJhdzwtY29udGVudCh3ZWJfcmVzcG9uc2UsInJhdyIpDQogIHdyaXRlQmluKHJhdyxmaWxlbmFtZSkNCiAgcmV0dXJuKGZpbGVuYW1lKQ0KfQ0KDQpqc29uX2FzX2RmPC1mdW5jdGlvbihkYXRhX2Zyb21maWxlLGNhc2UubnVtYmVyLHBlcnNvbi5pZCl7DQogICAgIGpzb25fZGY8LWRhdGFfZnJvbWZpbGUlPiUNCiAgICAgICAgICAgICAgdXNlX3NlcmllcyhFdmVudExpc3QpJT4lICAjdGhlIG1hZ3JpdHRyIHZlcnNpb24gb2YgJCBvcGVyYXRvcg0KICAgICAgICAgICAgICBtdXRhdGUoY2FzZV9udW09Y2FzZS5udW1iZXIsIHBlcnNvbl9pZD1wZXJzb24uaWQpDQogICAgIHJldHVybihqc29uX2RmKQ0KfQ0KDQpjaGFyZ2VfcGFyc2VyPC1mdW5jdGlvbihhY2hhcmdlKXsNCiAgYWNoYXJnZSU+JQ0KICAgIHVzZV9zZXJpZXMoRGlzcG9zaXRpb25MaXN0KSU+JQ0KICAgIHVubGlzdCgpJT4lDQogICAgbWF0cml4KG5yb3c9MSxieXJvdz1UKSU+JQ0KICAgIGRhdGEuZnJhbWUoc3RyaW5nc0FzRmFjdG9ycz1GKSU+JQ0KICAgIG11dGF0ZShjYXNlX251bWJlcj14bWxMaXN0JENhc2VfTnVtYmVyLA0KICAgICAgICAgIE9mZmVuc2VEYXRlPWFjaGFyZ2UkT2ZmZW5zZV9EYXRlLA0KICAgICAgICAgIENoYXJnZT1hY2hhcmdlJENoYXJnZSkNCn0NCg0KeG1sX2FzX2RmPC1mdW5jdGlvbihmaWxlbmFtZSxjYXNlLm51bWJlcixwZXJzb24uaWQpew0KICB4bWxMaXN0PC1maWxlbmFtZSU+JQ0KICAgICAgICAgICAgcmVhZF94bWwoKSU+JQ0KICAgICAgICAgICAgeG1sVHJlZVBhcnNlJT4lDQogICAgICAgICAgICB1c2Vfc2VyaWVzKGRvYyklPiUNCiAgICAgICAgICAgIHVzZV9zZXJpZXMoY2hpbGRyZW4pJT4lDQogICAgICAgICAgICB1c2Vfc2VyaWVzKHN0cmluZyklPiUNCiAgICAgICAgICAgIHhtbFRvTGlzdCU+JQ0KICAgICAgICAgICAgeG1sUGFyc2UlPiUNCiAgICAgICAgICAgIHhtbFRvTGlzdA0KDQogIHhtbF9kZjwteG1sTGlzdFstMV0lPiUNCiAgICAgICAgICAgIHNhcHBseShjaGFyZ2VfcGFyc2VyKSU+JQ0KICAgICAgICAgICAgdCgpJT4lDQogICAgICAgICAgICBhcy5kYXRhLmZyYW1lKHJvdy5uYW1lcz1GKQ0KfQ0KYGBgDQoNCg0KDQoqKlRFU1RJTkcgQ09ERSoqDQpUZXN0IGNhbGwgdG8gYXBpDQpgYGB7cn0NCnBiIDwtIHByb2dyZXNzX2VzdGltYXRlZChsZW5ndGgoMSkpDQoNCiMgY2FzZW51bTwtIjA5MDgzNzk3VEkzMEEiDQojcGVyc29uaWQ8LTENCiMgcmVxdWVzdD0iY3JpbV9kaXNwb3NpdGlvbnMiDQojZGlzcDwtZ2V0SlNPTihjYXNlbnVtLHJlcXVlc3QpDQojd3JpdGVUb1N5c3RlbShldmVudHNkb2NzLGNhc2VudW0sImV2ZW50c2RvY3MudHh0IikNCiNyb3c8LXNsaWNlKHNhbXBsZSwxOjEpDQoNCnRlc3RkZjwtYXBpX2NhbGwocm93ICxyZXF1ZXN0KQ0KDQojcmVzdWx0PC1qc29uX2FzX2RmKGpzb25fc3RyaW5nLCByZXF1ZXN0LGNhc2VudW0scGVyc29uaWQpDQpgYGANClRlc3QgbWFwX2Rmcg0KYGBge3J9DQojdGFrZXMgbXBnIGFzIGlucHV0IGFuZCByZXR1cm5zIGEgZGYNCnRlc3RpcmlzPC1zZWxlY3QoaGVhZChpcmlzKSxTZXBhbC5MZW5ndGgsIFNlcGFsLldpZHRoKQ0Kc2VsZjwtZnVuY3Rpb24odGVzdGxpc3Qpew0KICBwcmludCgiZW50ZXJlZCBmdW5jdGlvbiIpDQoNCiAgbXBnPC10ZXN0bGlzdFsxXSRtcGcNCiAgcHJpbnQobXBnKQ0KICBjeWw8LXRlc3RsaXN0WzJdJGN5bA0KICByZXN1bHQ8LXRlc3RpcmlzJT4lDQogICAgICAgICAgICAgbXVsdGlwbHlfYnkobXBnKSU+JQ0KICAgICAgICAgICAgIG11dGF0ZShtdWx0YnltcGc9bXBnLG5hbWU9Y3lsKQ0KICByZXR1cm4gKHJlc3VsdCkNCn0NCiN0ZXN0bGlzdD1hcy5saXN0KG10Y2FycykNCnRlc3RsaXN0PC1tdGNhcnMlPiUNCiAgICAgICAgICAgICAgaGVhZCgpJT4lDQogICAgICAgICAgICAgIHNwbGl0KHNlcShucm93KC4pKSkNCiN0ZXN0bGlzdCA8LSBzcGxpdChtdGNhcnMsIHNlcShucm93KG10Y2FycykpKQ0KDQp0ZXN0Y2FyczwtbWFwX2Rmcih0ZXN0bGlzdCx+c2VsZigueCkpICNmaW5kaW5nOiBtYXBkZnIgdGFrZXMgYSBsaXN0IGFzIGlucHV0LCBvciBjb2VyY2VzIGRmIGNvdW1ucyB0byBsaXN0DQojc2hvdWxkIHJldHVybiBkZiB3aXRoIHRoZSBtcGcqdGVzdGlyaXMNCiNFeHBlY3RlZCBsZW5ndGg6IGlyaXMgbGVuZ3RoICogbXRjYXJzIGxlbmd0aDsgNiozMj0xOTINCmBgYA0KVGVzdCBtYXBfZGZyIHdpdGggZGZfYXNfbGlzdA0KYGBge3J9DQp0ZXN0aXJpczwtc2VsZWN0KGhlYWQoaXJpcyksU2VwYWwuTGVuZ3RoLCBTZXBhbC5XaWR0aCkNCnNlbGY8LWZ1bmN0aW9uKHNhbXBsZV9yb3cpew0KICBwZXJzb24uaWQ8LXNhbXBsZV9yb3ckcGVyc29uX2lkDQogIGNhc2UubnVtYmVyPC1zYW1wbGVfcm93JGNhc2VfbnVtYmVyDQogIA0KIyAgcHJpbnQoImVudGVyZWQgZnVuY3Rpb24iKQ0KICByZXN1bHQ8LXRlc3RpcmlzJT4lDQogICAgICAgICAgICAgbXVsdGlwbHlfYnkoNSklPiUNCiAgICAgICAgICAgICBtdXRhdGUocGVyc2lkPXBlcnNvbi5pZCxjYXNlbnVtPWNhc2UubnVtYmVyKQ0KICByZXR1cm4gKHJlc3VsdCkNCn0NCg0Kc2FmZV9zZWxmPC1zYWZlbHkoc2VsZikNCg0Kd3JhcHBlcjwtZnVuY3Rpb24oc2FtcGxlX3Jvdyl7DQogIHJlczwtc2FmZV9zZWxmKHNhbXBsZV9yb3cpDQogIGlmKGlzLm51bGwocmVzJHJlc3VsdCkpew0KICAgIHByaW50KCJpcyBudWxsIikNCiAgICByZXR1cm4oKQ0KICB9DQogIHByaW50KCJwYXNzZWQiKQ0KICByZXR1cm4ocmVzJHJlc3VsdCkNCn0NCg0KdGVzdG1hcDwtbWFwX2RmcihkZl93aXRoX2ZsYXcsIH53cmFwcGVyKC54KSkNCg0KI1FVZXN0aW9uOiBob3cgZG9lcyBtYXBfZGZyIGRlYWwgd2l0aCAxIG51bGw/IA0KI0Fuc3dlcjogZGVhbHMgd2VsbCwgcmV0dXJucyBhbnl3YXlzDQpkZl93aXRoX2ZsYXc8LWRmX2FzX2xpc3QNCmRmX3dpdGhfZmxhdyRgMWAkY2FzZV9udW1iZXI9TlVMTA0Kc2FtcGxlX3JvdzwtZGZfYXNfbGlzdCRgMmANCnRlc3RyZXN1bHQ8LXNhZmVfc2VsZihzYW1wbGVfcm93KQ0KYGBgDQoNClRlc3QgcHJvY2Vzc2luZyBldmVudHNfZG9jcyB3aXRoIGpzb25saXRlDQpGaW5kaW5nczoganNvbl9mcm9tZmlsZSBpcyB0aGUgc2FtZSBhcyBqc29uX2Zyb211cmwNCkVpdGhlciB3YXkgaSBkbyBpdCwgc2hvdWxkIHByb2JhYmx5IGRvIHRoZSBodHRwIHJlcXVlc3QganVzdCBzbyBJIGNhbiBjaGVjayBzdGF0dXMNCmBgYHtyfQ0KI3Rlc3Qgd2l0aCByZWFkaW5nIGZyb20gZmlsZQ0KanNvbl9mcm9tZmlsZTwtZnJvbUpTT04odHh0PWZpbGVuYW1lKQ0KI2EgbGlzdCBkZmh5YnJpZA0KanNvbl9kZjwtanNvbl9mcm9tZmlsZSRFdmVudExpc3QgI2EgZGF0YWZyYW1lDQpuYW1lcyhqc29uX2RmJFBhcnR5TGlzdFsxXSkNCg0KIyAjdGVzdCB3aXRoIHJlYWRpbmcgZnJvbSB1cmwNCiMgcmVxdWVzdF90eXBlPSJldmVudHNfYW5kX2RvY3VtZW50cyINCiMgY2FzZW51bWJlcjwtIjE2MDAwMzMzQ0YxMEEiDQojIGpzb25fZnJvbXVybDwtZnJvbUpTT04odHh0PXBhc3RlMCh1cmxfYnJvd2FyZCwnY2FzZS8nLGNhc2VudW1iZXIsJy8nLHJlcXVlc3RfdHlwZSwnLmpzb24/YXV0aF9rZXk9JyxrZXkpKQ0KI2p1c3QgbmVlZCB0aGUgZGVzY3JpcHRpb24gb2YgZWFjaCBldmVudCwgZG9uJ3QgbmVlZCBhbnl0aGluZyBlbHNlDQojZnJvbSBjb21tYW5kIHByaW50KGV2ZW50bGlzdCRFdmVudExpc3QpOiBlYWNoIGVsZW1lbnQgb2YgZXZlbnRsaXN0JEV2ZW50TGlzdCBoYXMgJEV2ZW50RGF0ZSwgJERlc2NyaXB0aW9uLCAkRXZlbnRBbW91bnQsICRBZGRpdGlvbmFsVGV4dCwgJFBhcnR5TGlzdCwgJFBhcnR5Mkxpc3QsICRDYXVzZUxpc3QsIA0KIyRFdmVudERvY3VtZW50TGlzdCwgJEV2ZW50RG9jdW1lbnRMaXN0JE5hbWUsICRFdmVudERvY3VtZW50TGlzdCRQYWdlLCAkZXZlbnREb2N1bWVudCRDb25maWRlbnRpYWwNCg0KYGBgDQpUZXN0IHByb2Nlc3NpbmcgY3JpbV9kaXNwb3NpdGlvbnMgd2l0aCBqc29ubGl0ZSBwYWNrYWdlDQpgYGB7cn0NCmRpc3A8LWdldF9kYXRhKGNhc2VudW0scmVxdWVzdCwianNvbiIpDQpmaWxlbmFtZT13cml0ZVRvU3lzdGVtKGRpc3AsY2FzZW51bSxyZXF1ZXN0LCJqc29uIikNCmpzb25fc3RyaW5nPC1mcm9tSlNPTih0eHQ9ZmlsZW5hbWUpDQoNCmpzb25fZGY8LWpzb25fc3RyaW5nJENoYXJnZURpc3Bvc2l0aW9uTGlzdA0KZGlzcG9fZGY8LXNlbGVjdChqc29uX2RmLENoYXJnZSxPZmZlbnNlX0RhdGUsRGlzcG9zaXRpb25MaXN0KQ0KZGlzcHM8LWpzb25fZGYkRGlzcG9zaXRpb25MaXN0DQpWaWV3KGRpc3BzKQ0KI2xpc3RvbGlzdHM8LXNlbGVjdChqc29uX2RmLERpc3Bvc2l0aW9uTGlzdCxQbGVhTGlzdCxTZW50ZW5jZUxpc3QpDQpsaXN0ZWxlbSA8LSBkaXNwcyU+JQ0KICAgICAgICAgICAgICAgIGRvLmNhbGwocmJpbmQuZGF0YS5mcmFtZSwgLiklPiUNCiAgICAgICAgICAgICAgICBtdXRhdGUoY2FzZV9udW09anNvbl9zdHJpbmckQ2FzZV9OdW1iZXIsDQogICAgICAgICAgICAgICAgICAgICAgICNwZXJzb25faWQ9LA0KICAgICAgICAgICAgICAgICAgICAgICBPZmZlbnNlRGF0ZT1qc29uX2RmJE9mZmVuc2VfRGF0ZSwNCiAgICAgICAgICAgICAgICAgICAgICAgQ2hhcmdlPWpzb25fZGYkQ2hhcmdlKQ0KVmlldyhsaXN0ZWxlbSkNCg0KYGBgDQoNClRlc3QgcHJvY2Vzc2luZyBjcmltX2Rpc3Bvc2l0aW9ucyB3aXRoIHhtbDIgYW5kIFhNTCBwYWNrYWdlcw0KQ2FzZXMgZm9yIHBlcnNvbl9pZD09NDogDQpbMV0gIjA5MDI0MzA4VEkyMEEiICIwOTA1NzkwOVRJMjBBIiAiMTEwMjA5NTNDRjEwQSIgIjEyMDE3NjM1Q0YxMEEiICIxMjAxOTM0MVRJMjBBIiAiMTIwNzQ5OTNUSTMwQSINCiBbN10gIjEzMDAyNjUzTU0xMEEiICIxMzAwNDM3NVRDMTBBIiAiMTMwMDUzMzBDRjEwQSIgIjEzMDEwNjYzQ0YxMEEiICIxMzAxMTUxMU1NMTBBIiAiMTQwMTIxMjBUQzEwQSINClsxM10gIjE2MDAwMzIyTU0xMEEiICIxNjAwMDc1NE1NMjBBIg0KDQoxMjAxOTM0MVRJMjBBIGlzIGNhdXNpbmcgaXNzdWVzDQpEZWJ1Z2dpbmcgbm90ZXM6IGFjaGFyZ2UgaXMgYSBsaXN0IG9mIDcNCmBgYHtyfQ0KIyByZXF1ZXN0PSJjcmltX2Rpc3Bvc2l0aW9ucyINCiMgZGlzcDwtZ2V0X2RhdGEoY2FzZW51bSwgcmVxdWVzdCwieG1sIiApDQojIGZpbGVuYW1lPC13cml0ZVRvU3lzdGVtKGRpc3AsY2FzZW51bSxyZXF1ZXN0LCJ4bWwiKQ0KDQpwZXJzb24uaWQ9NA0KIyBjYXNlLm51bWJlcj0iMTMwMDA1NzBDRjEwQSIgI3RoaXMgY2FzZSBoYXMgTlVMTCBlbGVtZW50cw0KIyBjYXNlLm51bWJlcj0iMDkwODM3OTdUSTMwQSIgI3RoaXMgY2FzZSBkb2Vzbid0IGhhdmUgTlVMTHMNCiNjYXNlLm51bWJlcj0iMTEwMjA5NTNDRjEwQSINCmNhc2UubnVtYmVyPSIxMjAxOTM0MVRJMjBBIiAjcHJvYmxlbSBjYXNlIGZvciBwZXJzb25faWQ9PTQNCg0KZmlsZW5hbWU8LXBhc3RlMCgiQzovVXNlcnMvQ2Fyb2xpbmUgV2FuZy9PbmVEcml2ZS9EdWtlL0NyaW1pbmFsIFJlY2lkaXZpc20vZGlzcHNfZGF0YS8iLGNhc2UubnVtYmVyLCJjcmltX2Rpc3Bvc2l0aW9ucy50eHRfeG1sIikNCnhtbExpc3Q8LWZpbGVuYW1lJT4lDQogICAgICAgICAgICByZWFkX3htbCgpJT4lDQogICAgICAgICAgICB4bWxUcmVlUGFyc2UlPiUNCiAgICAgICAgICAgIHVzZV9zZXJpZXMoZG9jKSU+JQ0KICAgICAgICAgICAgdXNlX3NlcmllcyhjaGlsZHJlbiklPiUNCiAgICAgICAgICAgIHVzZV9zZXJpZXMoc3RyaW5nKSU+JQ0KICAgICAgICAgICAgeG1sVG9MaXN0JT4lDQogICAgICAgICAgICB4bWxQYXJzZSU+JQ0KICAgICAgICAgICAgeG1sVG9MaXN0DQoNCiMgeG1sX2NoYXJnZURpc3BMaXN0PC14bWxMaXN0JENoYXJnZURpc3Bvc2l0aW9uTGlzdA0KI2Rpc3BsaXN0PC0geG1sX2NoYXJnZURpc3BMaXN0JERpc3Bvc2l0aW9uTGlzdA0KDQppc05BPUZBTFNFICN3aGVuIGluc2VydGluZyBpbnRvIGZ1bmN0aW9uIGxhdGVyLCBiZSBjYXJlZnVsIHdoZXJlIHlvdSBwdXQgaXQNCiNzaG91bGQgYmUgcmVzZXQgdG8gRiB3aGVuZXZlciB3ZSBtb3ZlIG9udG8gYSBuZXcgY2FzZSANCmNoYXJnZV9wYXJzZXI8LWZ1bmN0aW9uKGFjaGFyZ2UsY2FzZS5udW1iZXIscGVyc29uLmlkKXsNCiAgICMgcHJpbnQoYWNoYXJnZSkNCiAgIyBwcmludChjYXNlLm51bWJlcikNCiAgIyBwcmludChwZXJzb24uaWQpDQogICMgY2hhcmdlX3dpdGhfbnVsbDw8LWFjaGFyZ2UkRGlzcG9zaXRpb25MaXN0DQogIGFjaGFyZ2U8PC1hY2hhcmdlDQogIGlmKGlzLm51bGwoYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QpKXsNCiAgICBpc05BPDwtVFJVRQ0KICAgIHByaW50KCJpc251bGwiKQ0KICAgIHJldHVybihOQSkNCiAgfQ0KICANCiAgZGlzcF9mcmFtZTwtYWNoYXJnZSREaXNwb3NpdGlvbkxpc3QlPiUNCiAgICAgICAgICAgICAgICMgcHJpbnQoKSU+JQ0KICAgICAgICAgICAgICB1bmxpc3QoKSU+JQ0KICAjICAgICAgICAgICAgICMgcHJpbnQoKSU+JQ0KICAgICAgICAgICAgICBtYXRyaXgobnJvdz0xLGJ5cm93PVQpJT4lDQoNCiAgICAgICAgICAgICAgZGF0YS5mcmFtZShzdHJpbmdzQXNGYWN0b3JzPUYpDQoNCiAgZGlzcF9mcmFtZTwtbXV0YXRlKGRpc3BfZnJhbWUsY2FzZV9udW1iZXI9Y2FzZS5udW1iZXIsDQogICAgICAgICAgICAgIHBlcnNvbl9pZD1wZXJzb24uaWQsDQogICAgICAgICAgICAgIE9mZmVuc2VEYXRlPWFjaGFyZ2UkT2ZmZW5zZV9EYXRlLA0KICAgICAgICAgICAgICBDaGFyZ2U9YWNoYXJnZSRDaGFyZ2UpDQp9DQoNCnJlbW92ZU5BX21hdHJpeENvbDwtZnVuY3Rpb24obWF0cml4KXsNCiAgaWYoaXNOQT09VCl7DQogICAgcHJpbnQoImlzTkE9PVQiKQ0KICAgIHJldHVybihtYXRyaXhbY29sU3VtcyghaXMubmEobWF0cml4KSk+MF0pDQogIH0NCiAgcmV0dXJuKG1hdHJpeCkNCn0NCmRlYnVnKGNoYXJnZV9wYXJzZXIpDQp4bWxfZGY8LXNhcHBseSh4bWxMaXN0Wy0xXSxjaGFyZ2VfcGFyc2VyLGNhc2UubnVtYmVyLHBlcnNvbi5pZCklPiUNCiAgICAgICAgICAgIHQoKQ0KICAgICAgICAgICAgIyBwcmludCgpJT4lDQogICAgICAgICAgICAjIHJlbW92ZU5BX21hdHJpeENvbCguKQ0KICAgICAgICAgICAgIyBhcy5kYXRhLmZyYW1lKHJvdy5uYW1lcz1OVUxMLHN0cmluZ3NBc0ZhY3RvcnM9RikNCiAgICAgICAgICAgICMgbWFwX2RmKHVubGlzdCkgDQoNCiAgICAgICAgICAgIA0KI2NvbDE8LWFzLmNoYXJhY3Rlcih4bWxfZGYkYy4uMDEuMDguMjAxMC4uLi5jb252aWN0ZWQuYnkuUGxlYS4uLkFkanVkaWNhdGVkLi4pDQojdGVzdGRmPC1kYXRhLmZyYW1lKG1hdHJpeCh1bmxpc3QoZGlzcGxpc3QpLCBucm93PTEsIGJ5cm93PVQpLHN0cmluZ3NBc0ZhY3RvcnM9RkFMU0UpDQojdGliYmxlPC0gYXNfZGF0YV9mcmFtZSh1bmxpc3QoZGlzcGxpc3QpKQ0KDQpWaWV3KGNoYXJnZV9wYXJzZXIoYWNoYXJnZSxjYXNlLm51bWJlcixwZXJzb24uaWQpKQ0KVmlldyh4bWxfZGYpDQpgYGANCg0KYSBzZWNvbmQgY29weSBvZiBjb2RlIHNvIEkgY2FuIGxvb2sgYXQgdGhlIHdheSBteSBjb2RlIGhhbmRsZXMgMiBkaWZmZXJlbnQgY2FzZXMNCmBgYHtyfQ0KcGVyc29uLmlkPTQNCmNhc2UubnVtYmVyMj0iMDkwODM3OTdUSTMwQSIgI3RoaXMgY2FzZSBkb2Vzbid0IGhhdmUgTlVMTHMNCg0KZmlsZW5hbWUyPC1wYXN0ZTAoIkM6L1VzZXJzL0Nhcm9saW5lIFdhbmcvT25lRHJpdmUvRHVrZS9DcmltaW5hbCBSZWNpZGl2aXNtL2Rpc3BzX2RhdGEvIixjYXNlLm51bWJlcjIsImNyaW1fZGlzcG9zaXRpb25zLnR4dF94bWwiKQ0KeG1sTGlzdDI8LWZpbGVuYW1lMiU+JQ0KICAgICAgICAgICAgcmVhZF94bWwoKSU+JQ0KICAgICAgICAgICAgeG1sVHJlZVBhcnNlJT4lDQogICAgICAgICAgICB1c2Vfc2VyaWVzKGRvYyklPiUNCiAgICAgICAgICAgIHVzZV9zZXJpZXMoY2hpbGRyZW4pJT4lDQogICAgICAgICAgICB1c2Vfc2VyaWVzKHN0cmluZyklPiUNCiAgICAgICAgICAgIHhtbFRvTGlzdCU+JQ0KICAgICAgICAgICAgeG1sUGFyc2UlPiUNCiAgICAgICAgICAgIHhtbFRvTGlzdA0KDQojIHhtbF9jaGFyZ2VEaXNwTGlzdDwteG1sTGlzdCRDaGFyZ2VEaXNwb3NpdGlvbkxpc3QNCiNkaXNwbGlzdDwtIHhtbF9jaGFyZ2VEaXNwTGlzdCREaXNwb3NpdGlvbkxpc3QNCg0KaXNOQT1GQUxTRSAjd2hlbiBpbnNlcnRpbmcgaW50byBmdW5jdGlvbiBsYXRlciwgYmUgY2FyZWZ1bCB3aGVyZSB5b3UgcHV0IGl0DQojc2hvdWxkIGJlIHJlc2V0IHRvIEYgd2hlbmV2ZXIgd2UgbW92ZSBvbnRvIGEgbmV3IGNhc2UgDQpjaGFyZ2VfcGFyc2VyMjwtZnVuY3Rpb24oYWNoYXJnZSxjYXNlLm51bWJlcixwZXJzb24uaWQpew0KICBhY2hhcmdlMjw8LWFjaGFyZ2UNCiAgaWYoaXMubnVsbChhY2hhcmdlJERpc3Bvc2l0aW9uTGlzdCkpew0KICAgIGlzTkE8PC1UUlVFDQogICAgcHJpbnQoImlzbnVsbCIpDQogICAgcmV0dXJuKE5BKQ0KICB9DQogIGRpc3BfZnJhbWU8LWFjaGFyZ2UkRGlzcG9zaXRpb25MaXN0JT4lDQogICAgICAgICAgICAgICAjIHByaW50KCklPiUNCiAgICAgICAgICAgICAgdW5saXN0KCklPiUNCiAgIyAgICAgICAgICAgICAjIHByaW50KCklPiUNCiAgICAgICAgICAgICAgbWF0cml4KG5yb3c9MSxieXJvdz1UKSU+JQ0KDQogICAgICAgICAgICAgIGRhdGEuZnJhbWUoc3RyaW5nc0FzRmFjdG9ycz1GKQ0KDQogIGRpc3BfZnJhbWU8LW11dGF0ZShkaXNwX2ZyYW1lLGNhc2VfbnVtYmVyPWNhc2UubnVtYmVyLA0KICAgICAgICAgICAgICBwZXJzb25faWQ9cGVyc29uLmlkLA0KICAgICAgICAgICAgICBPZmZlbnNlRGF0ZT1hY2hhcmdlJE9mZmVuc2VfRGF0ZSwNCiAgICAgICAgICAgICAgQ2hhcmdlPWFjaGFyZ2UkQ2hhcmdlKQ0KfQ0KDQp4bWxfZGYyPC1zYXBwbHkoeG1sTGlzdDJbLTFdLGNoYXJnZV9wYXJzZXIyLGNhc2UubnVtYmVyMixwZXJzb24uaWQpJT4lDQogICAgICAgICAgICB0KCkNCiAgICAgICAgICAgICMgcHJpbnQoKSU+JQ0KICAgICAgICAgICAgIyByZW1vdmVOQV9tYXRyaXhDb2woLikNCiAgICAgICAgICAgICMgYXMuZGF0YS5mcmFtZShyb3cubmFtZXM9TlVMTCxzdHJpbmdzQXNGYWN0b3JzPUYpDQogICAgICAgICAgICAjIG1hcF9kZih1bmxpc3QpIA0KDQpzYW1wbGVjaGFyZ2UxPShjaGFyZ2VfcGFyc2VyKGFjaGFyZ2UsY2FzZS5udW1iZXIscGVyc29uLmlkKSkNCnNhbXBsZWNoYXJnZTI9KGNoYXJnZV9wYXJzZXIoYWNoYXJnZTIsY2FzZS5udW1iZXIscGVyc29uLmlkKSkNClZpZXcoeG1sX2RmKQ0KVmlldyh4bWxfZGYyKQ0KDQpgYGANCg0KVGVzdCBzYXBwbHkNCmBgYHtyfQ0KYWRkZXI8LWZ1bmN0aW9uKHgsY2hhcmFjKXsNCiAgcHJpbnQoY2hhcmFjKQ0KICB4KzMNCn0NCnNhcHBseV90ZXN0PC1zYXBwbHkoMTozLGFkZGVyLCJhIikNCmBgYA0KDQoNCg0K</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpUaGlzIGlzIGFuIFtSIE1hcmtkb3duXShodHRwOi8vcm1hcmtkb3duLnJzdHVkaW8uY29tKSBOb3RlYm9vay4gV2hlbiB5b3UgZXhlY3V0ZSBjb2RlIHdpdGhpbiB0aGUgbm90ZWJvb2ssIHRoZSByZXN1bHRzIGFwcGVhciBiZW5lYXRoIHRoZSBjb2RlLiANCg0KDQpXaGVuIHlvdSBzYXZlIHRoZSBub3RlYm9vaywgYW4gSFRNTCBmaWxlIGNvbnRhaW5pbmcgdGhlIGNvZGUgYW5kIG91dHB1dCB3aWxsIGJlIHNhdmVkIGFsb25nc2lkZSBpdCAoY2xpY2sgdGhlICpQcmV2aWV3KiBidXR0b24gb3IgcHJlc3MgKkN0cmwrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4NCg0KYGBge3J9DQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmxpYnJhcnkoaHR0cikNCmxpYnJhcnkoanNvbmxpdGUpDQpsaWJyYXJ5KHhtbDIpDQpsaWJyYXJ5KFhNTCkNCmxpYnJhcnkobWFncml0dHIpDQoNCmBgYA0KDQoNCmBgYHtyfQ0KeCA9IGxhcHBseSh3aGljaChuYW1lcyh4bWxMaXN0KT09J0NoYXJnZURpc3Bvc2l0aW9uTGlzdCcpLCANCiAgICAgICBmdW5jdGlvbihrKSBsYXBwbHkod2hpY2gobmFtZXMoeG1sTGlzdFtba11dKT09J0Rpc3Bvc2l0aW9uTGlzdCcpLCBmdW5jdGlvbihpKSB4bWxMaXN0W1trXV1bW2ldXSkNCiAgKQ0KDQojZ2V0cyBhIGxpc3QgaG9wZWZ1bGx5IHdpdGggYWxsIHRoZSBjaGFyZ2VEaXNwb3NpdGlvbkxpc3RzIGFuZCBEaXNwb3NpdGlvbkxpc3RzLCBhbGwgbnVtYmVyZWQgZGlmZmVyZW50bHkNCiNsYXBwbHkod2hpY2gobmFtZXMoeG1sTGlzdFtbMl1dKT09J0Rpc3Bvc2l0aW9uTGlzdCcpLCBmdW5jdGlvbihpKSB4bWxMaXN0W1syXV1bW2ldXSkNCmBgYA0KDQpUZXN0IHByb2Nlc3NpbmcgY3JpbV9kaXNwb3NpdGlvbnMgd2l0aCB4bWwyIGFuZCBYTUwgcGFja2FnZXMNCkNhc2VzIGZvciBwZXJzb25faWQ9PTQ6IA0KWzFdICIwOTAyNDMwOFRJMjBBIiAiMDkwNTc5MDlUSTIwQSIgIjExMDIwOTUzQ0YxMEEiICIxMjAxNzYzNUNGMTBBIiAiMTIwMTkzNDFUSTIwQSIgIjEyMDc0OTkzVEkzMEEiDQogWzddICIxMzAwMjY1M01NMTBBIiAiMTMwMDQzNzVUQzEwQSIgIjEzMDA1MzMwQ0YxMEEiICIxMzAxMDY2M0NGMTBBIiAiMTMwMTE1MTFNTTEwQSIgIjE0MDEyMTIwVEMxMEEiDQpbMTNdICIxNjAwMDMyMk1NMTBBIiAiMTYwMDA3NTRNTTIwQSINCg0KRlVOQ1RJT04gTk9URVM6IA0KZGlzcF9wYXJzZXIyIHRha2VzIGluIGEgbGlzdCBhbmQgcmV0dXJucyBhIGRhdGFmcmFtZSBmb3IgYSBTSU5HTEUgZGlzcG9zaXRpb24uIE5vdGUgdGhhdCBlYWNoIENBU0UgY2FuIGhhdmUgbXVsdGlwbGUgQ0hBUkdFUywgYW5kIGVhY2ggQ0hBUkdFIGhhcyBtdWx0aXBsZSBkaXNwb3NpdGlvbnMuIA0KY2hhcmdlX3BhcnNlcjIgdGFrZXMgaW4gYSBsaXN0IGFuZCByZXR1cm5zIGEgZGF0YWZyYW1lIGZvciBhIHNpbmdsZSBDSEFSR0UNCmBgYHtyfQ0KcGVyc29uLmlkPTQNCg0KIyBjYXNlLm51bWJlcj0iMTMwMDA1NzBDRjEwQSIgI3RoaXMgY2FzZSBoYXMgTlVMTCBlbGVtZW50cw0KIyBjYXNlLm51bWJlcj0iMDkwODM3OTdUSTMwQSIgI3RoaXMgY2FzZSBkb2Vzbid0IGhhdmUgTlVMTHMNCiNjYXNlLm51bWJlcj0iMTEwMjA5NTNDRjEwQSINCiMgY2FzZS5udW1iZXI9IjEyMDE5MzQxVEkyMEEiICNwcm9ibGVtIGNhc2UgZm9yIHBlcnNvbl9pZD09NA0KDQoNCiMgY2FzZS5udW1iZXIyPSIxMjAxOTM0MVRJMjBBIg0KY2FzZS5udW1iZXIyPSIxMzAwMDU3MENGMTBBIiAjdGhpcyBjYXNlIGhhcyBOVUxMIGVsZW1lbnRzDQoNCmZpbGVuYW1lMjwtcGFzdGUwKCJDOi9Vc2Vycy9DYXJvbGluZSBXYW5nL09uZURyaXZlL0R1a2UvQ3JpbWluYWwgUmVjaWRpdmlzbS9kaXNwc19kYXRhLyIsY2FzZS5udW1iZXIyLCJjcmltX2Rpc3Bvc2l0aW9ucy50eHRfeG1sIikNCnhtbExpc3QyPC1maWxlbmFtZTIlPiUNCiAgICAgICAgICAgIHJlYWRfeG1sKCklPiUNCiAgICAgICAgICAgIHhtbFRyZWVQYXJzZSU+JQ0KICAgICAgICAgICAgdXNlX3Nlcmllcyhkb2MpJT4lDQogICAgICAgICAgICB1c2Vfc2VyaWVzKGNoaWxkcmVuKSU+JQ0KICAgICAgICAgICAgdXNlX3NlcmllcyhzdHJpbmcpJT4lDQogICAgICAgICAgICB4bWxUb0xpc3QlPiUNCiAgICAgICAgICAgIHhtbFBhcnNlJT4lDQogICAgICAgICAgICB4bWxUb0xpc3QNCg0KZmlsdGVyZWRfbGlzdCA9IGxhcHBseSh3aGljaChuYW1lcyh4bWxMaXN0Mik9PSdDaGFyZ2VEaXNwb3NpdGlvbkxpc3QnKSwgDQogICAgICAgZnVuY3Rpb24oaykgbGFwcGx5KHdoaWNoKG5hbWVzKHhtbExpc3QyW1trXV0pPT0nRGlzcG9zaXRpb25MaXN0J3xuYW1lcyh4bWxMaXN0Mltba11dKT09J09mZmVuc2VfRGF0ZSd8bmFtZXMoeG1sTGlzdDJbW2tdXSk9PSdDaGFyZ2UnKSwgZnVuY3Rpb24oaSkgeG1sTGlzdDJbW2tdXVtbaV1dKQ0KICApDQoNCmRpc3BfcGFyc2VyMjwtZnVuY3Rpb24oYV9kaXNwKXsNCiAgI2FfZGlzcCBpcyBhIGxpc3QgZm9yIE9ORSBESVNQT1NJVElPTg0KICBkaXNwX2ZyYW1lPC1hX2Rpc3AlPiUNCiAgICAgICAgICAgICAgICB1bmxpc3QoKSU+JQ0KICAgICAgICAgICAgICAgIG1hdHJpeChucm93PTEsIGJ5cm93PVQpJT4lDQogICAgICAgICAgICAgICAgZGF0YS5mcmFtZShzdHJpbmdzQXNGYWN0b3JzPUYpDQp9DQoNCmNoYXJnZV9wYXJzZXIyPC1mdW5jdGlvbihhY2hhcmdlLGNhc2UubnVtYmVyLHBlcnNvbi5pZCl7DQogICNhY2hhcmdlIGlzIHRoZSBsaXN0IGNvbnRhaW5pbmcgY2hhcmdlIG51bWJlciwgb2ZmZW5zZSBkYXRlLCBhbmQgZGlzcG9zaXRpb24gaW5mb3JtYXRpb24gDQogICNOT1RFIFRIQVQgVEhFUkUgQ0FOIEJFIE1PUkUgVEhBTiBPTkUgRElTUE9TVElPTiwgd2hpY2ggaXMgIHdoeSBJIGhhdmUgdG8gaXNvbGF0ZWQgdGhlIGRpc3Bvc2l0aW9ucyBpbiB0aGVpciBvd24gbGlzdCBhbmQgY2FsbCBtYXBfZGYgb24gdGhlbQ0KICBkaXNwbGlzdHM8LWFjaGFyZ2VbLTFdWy0xXQ0KICAjZGlzcGxpc3QgaXMgYSBsaXN0IGNvbnRhaW5pbmcgT05MWSBkaXNwb3NpdGlvbnMgZm9yIE9ORSBjaGFyZ2UNCiAgY2hhcmdlX2ZyYW1lPC1kaXNwbGlzdHMlPiUNCiAgICAgICAgICAgICAgICBtYXBfZGYoZGlzcF9wYXJzZXIyKSU+JQ0KICAgICAgICAgICAgICAgIG11dGF0ZShjYXNlX251bWJlcj1jYXNlLm51bWJlciwNCiAgICAgICAgICAgICAgICAgICAgICAgcGVyc29uX2lkPXBlcnNvbi5pZCwNCiAgICAgICAgICAgICAgICAgICAgICAgT2ZmZW5zZURhdGU9YWNoYXJnZVtbMl1dLA0KICAgICAgICAgICAgICAgICAgICAgICBDaGFyZ2U9YWNoYXJnZVtbMV1dICN0aGlzIHJlZmVycyB0byB0aGUgY2hhcmdlIG51bWJlci4gSG93IGRvIEkga25vdyB0aGUgb3JkZXJpbmcgaXMgYWx3YXlzIGNvbnNpc3RlbnQ/IA0KICAgICAgICAgICAgICAgICkNCn0NCg0KeG1sX2RmMjwtbWFwX2RmKGZpbHRlcmVkX2xpc3QsY2hhcmdlX3BhcnNlcjIsY2FzZS5udW1iZXIyLHBlcnNvbi5pZCkNCiAgICAgICAgICAgICMgdCgpDQogICAgICAgICAgICAjIHByaW50KCklPiUNCiAgICAgICAgICAgICMgcmVtb3ZlTkFfbWF0cml4Q29sKC4pDQogICAgICAgICAgICAjIGFzLmRhdGEuZnJhbWUocm93Lm5hbWVzPU5VTEwsc3RyaW5nc0FzRmFjdG9ycz1GKQ0KICAgICAgICAgICAgIyBtYXBfZGYodW5saXN0KSANCg0KDQpgYGANCg0K</div>
 
 
 
