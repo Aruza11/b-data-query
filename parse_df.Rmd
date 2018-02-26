@@ -19,6 +19,7 @@ library(magrittr)
 library(stringr)
 library(xml2)
 library(XML)
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/b-data-query")
 
 ```
 
@@ -80,61 +81,31 @@ write.csv(fail_to_appear,"Data tables/fail_to_appear.csv")
 
 Parsed the XML strings incorrectly when I queried the data from the web API, so I will reparse them here by reading the strings from my hard drive.
 ```{r}
-# charge_parser<-function(acharge,case.number,person.id){
-#   disp_frame<-acharge$DispositionList%>%
-#               # print()%>%
-#               unlist()%>%
-#               # print()%>%
-#               matrix(nrow=1,byrow=T)%>%
-#               data.frame(stringsAsFactors=F)
-#   
-#   disp_frame<-mutate(disp_frame,case_number=case.number,
-#               person_id=person.id,
-#               OffenseDate=acharge$Offense_Date,
-#               Charge=acharge$Charge)
-# }
-charge_parser<-function(acharge,case.number,person.id,isNA){
-   # print(acharge)
-  # print(case.number)
-  # print(person.id)
-  # charge_with_null<<-acharge$DispositionList
-  acharge<<-acharge
-  if(is.null(acharge$DispositionList)){
-    isNA<<-TRUE
-    print("isnull")
-    return(NA)
-  }
-  
-  disp_frame<-acharge$DispositionList%>%
-               # print()%>%
-              unlist()%>%
-  #             # print()%>%
-              matrix(nrow=1,byrow=T)%>%
-
-              data.frame(stringsAsFactors=F)
-
-  disp_frame<-mutate(disp_frame,case_number=case.number,
-              person_id=person.id,
-              OffenseDate=acharge$Offense_Date,
-              Charge=acharge$Charge)
+disp_parser<-function(a_disp){
+  #a_disp is a list for ONE DISPOSITION
+  disp_frame<-a_disp%>%
+                unlist()%>%
+                matrix(nrow=1, byrow=T)%>%
+                data.frame(stringsAsFactors=F)
 }
 
-#purpose: if isNA got tripped, then return the rows that are not zero
-removeNA_matrixCol<-function(matrix,isNA){
-  if(isNA==T){
-    print("isNA==T")
-    return(matrix[colSums(!is.na(matrix))>0])
-  }
-  return(matrix)
+charge_parser<-function(acharge,case.number,person.id){
+  displists<-acharge[-1][-1]
+  #displist is a list containing ONLY dispositions for ONE charge
+  charge_frame<-displists%>%
+                map_df(disp_parser)%>%
+                mutate(case_number=case.number,
+                       person_id=person.id,
+                       OffenseDate=if_else(is.null(acharge[[2]]),"No date",acharge[[2]]),
+                       Charge=if_else(is.null(acharge[[1]]),"No charge",acharge[[1]]) #this refers to the charge number. How do I know the ordering is always consistent?
+                )
 }
-
 
 reparse_from_system<-function(sample_row){
   pb$tick()$print()
 
   person.id<-sample_row$person_id
   case.number<-sample_row$case_number
-  isNA<<-FALSE
   
   filename<-paste0("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/disps_data/",case.number,"crim_dispositions.txt_xml")
 
@@ -148,44 +119,28 @@ reparse_from_system<-function(sample_row){
             xmlParse%>%
             xmlToList
   
-  # xml_df<-sapply(xmlList[-1],charge_parser,case.number,person.id)%>%
-  #         t()%>%
-  #         as.data.frame(row.names=NULL)
-  
-  xml_df<<-sapply(xmlList[-1],charge_parser,case.number,person.id,isNA)%>% #outputs list
-            t()%>% #outputs matrix
-            
-            removeNA_matrixCol(.,isNA )%>% #outputs matrix
 
-            as_data_frame(row.names=NULL,stringsAsFactors=F)%>% #problem: column types are list
-            map_df(unlist) 
-  
-  #this function will apply the unlist function to each column, so that each column is now a character vector as desired
-  #was experiencing issue where a few dataframes produced by this function had column type character, but the vast majority had column type list, so couldn't rbind it. 
-            # lapply(as.character)%>% #issue: screws up column names
-            # as_data_frame()
-
-  
-  print(xml_df)
-  return(xml_df)
+  filtered_list = lapply(which(names(xmlList)=='ChargeDispositionList'), 
+       function(k) lapply(which(names(xmlList[[k]])=='DispositionList'|names(xmlList[[k]])=='Offense_Date'|names(xmlList[[k]])=='Charge'), function(i) xmlList[[k]][[i]])
+  )
+  xml_df<-map_df(filtered_list,charge_parser,case.number,person.id)
 }
 
 safe_reparse<-safely(reparse_from_system)
 
 wrapper_reparse<-function(sample_row){
-  options(error=recover)
-  # res<-safe_reparse(sample_row)
-  res<-reparse_from_system(sample_row)
+  # options(error=recover)
+  res<-safe_reparse(sample_row)
+  # res<-reparse_from_system(sample_row)
 
-  # if(is.null(res$result)){
-  if(is.null(res)){
-
+  if(is.null(res$result)){
+  # if(is.null(res)){
     print(res$error)
     print(sample_row$case_number)
     return()
   }
-  # return(res$result)
-  return(res)
+  return(res$result)
+  # return(res)
 }
 
 ```
@@ -195,7 +150,8 @@ wrapper_reparse<-function(sample_row){
 ```{r}
 
 loopdf<-read.csv(file="C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/loopdf.csv")
-sample<-slice(loopdf,1:50)
+sample<-loopdf
+  #slice(loopdf,1:50)
 
 sample$case_number<-as.character(sample$case_number)
 sample$person_id<-as.numeric(sample$person_id)
@@ -209,7 +165,7 @@ df_as_list<-sample%>%
 ```{r}
 pb <- progress_estimated(length(sample$case_number))
 dispositions_df_orig<-map_dfr(df_as_list, ~wrapper_reparse(.x))
-# dispositions_df<-dispositions_df_orig
+dispositions_df<-dispositions_df_orig
 
 ```
 
@@ -234,7 +190,7 @@ _______________________________________________________________________
 
 Parsing csv file 
 ```{r}
-disp_df<-read.csv("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/corrected_disp_df.csv")
+dispositions_df<-read.csv("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/corrected_disp_df.csv")
 #unique(select(disp_df,X3))
 #View(disp_df)
 
@@ -242,7 +198,7 @@ disp_df<-read.csv("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data
 
 
 ```{r}
-convictions<-disp_df%>%
+convictions<-dispositions_df%>%
              mutate(convicted=if_else(str_detect(
              Description,coll("convicted",T,ignore_case=T))
                                       ==T,1,0))
