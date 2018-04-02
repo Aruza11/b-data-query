@@ -19,6 +19,8 @@ library(magrittr)
 library(stringr)
 library(xml2)
 library(XML)
+library(lubridate)
+
 setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/b-data-query")
 
 ```
@@ -33,7 +35,7 @@ eventsdescrp_df<-read.csv("Data tables/eventsdescrp_df1.csv")%>%
 
 
 eventsdescrp_df$Description<-as.character(eventsdescrp_df$Description)
-View(eventsdescrp_df)
+# View(eventsdescrp_df)
 ```
 
 idea: use group by person id, group by case number, call function 
@@ -199,18 +201,50 @@ dispositions_df<-read.csv("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidiv
 
 ```{r}
 convictions<-dispositions_df%>%
-             mutate(convicted=if_else(str_detect(
-             Description,coll("convicted",T,ignore_case=T))
-                                      ==T,1,0))
-                  
+             mutate(JudgementDate=ymd(JudgementDate),
+                    OffenseDate=ymd(OffenseDate),
+                    Description=as.character(Description),
+                    convicted=case_when(
+                                str_detect(Description,coll("Nolle Prosequi",T,ignore_case=T))~"N",
+                                str_detect(Description,coll("vacated",T,ignore_case=T))~"N",
+                                str_detect(Description,coll("dismissed",T,ignore_case=T))~"N",
+                                str_detect(Description,coll("convicted",T,ignore_case=T))~"Y",
+                                TRUE~"else"
+                                )
+                    )%>%
+            group_by(person_id,case_number,Charge)%>%
+                filter(JudgementDate==max(JudgementDate))%>%
+  
+                summarise(
+                  JudgementDate=max(JudgementDate),
+                  OffenseDate=max(OffenseDate),
+                  convicted=case_when(
+                                ("Y" %in% convicted & "N" %in% convicted)~0,
+                                ("Y" %in% convicted)~1,
+                                TRUE~0)
+                )
+
+#check for which ones ended up getting a N                  
 View(head(convictions))
                 
 ```
-
+debug 
+```{r}
+testiris<-iris%>%
+             group_by(Species)%>%
+             mutate( test=case_when(
+               # str_detect(Species,coll("setosa",T,ignore_case=T))~"s",
+               # str_detect(Species,coll("versicolor",T,ignore_case=T))~"v",
+               #                    # str_detect(Description,coll("dismissed",T,ignore_case=T))~"N",
+                                  # str_detect(Description,coll("convicted",T,ignore_case=T))~"Y",
+               # "setosa"%in%Species~"s",
+               T~"else"                   
+               ))
+```
 
 
 ```{r}
-write.csv(convictions,"C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/convicted_from_disps.csv")
+write.csv(convictions,"C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/convicted_from_disps2.csv")
 
 ```
 
