@@ -198,15 +198,16 @@ dispositions_df<-read.csv("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidiv
 
 ```
 
-
+GOod example with multiple dates/dispositions: https://www.browardclerk.org/Web2/CaseSearch/Details/?caseid=NjA4MTk4OA%3d%3d-lhwKuEShR5Y%3d&caseNum=12032995TI20A&category=CR
 ```{r}
+
 convictions<-dispositions_df%>%
              mutate(JudgementDate=ymd(JudgementDate),
                     OffenseDate=ymd(OffenseDate),
                     Description=as.character(Description),
                     convicted=case_when(
                                 str_detect(Description,coll("Nolle Prosequi",T,ignore_case=T))~"N",
-                                str_detect(Description,coll("vacated",T,ignore_case=T))~"N",
+                                str_detect(Description,coll("vacate",T,ignore_case=T))~"N",
                                 str_detect(Description,coll("dismissed",T,ignore_case=T))~"N",
                                 str_detect(Description,coll("convicted",T,ignore_case=T))~"Y",
                                 TRUE~"else"
