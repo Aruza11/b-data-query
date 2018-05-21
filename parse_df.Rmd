@@ -21,13 +21,13 @@ library(xml2)
 library(XML)
 library(lubridate)
 
-setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/b-data-query")
 
 ```
 
-**FAILURE TO APPEAR**
+**FAILURE TO APPEAR && PROBATION**
 Purpose: to determine 
 ```{r}
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism")
 eventsdescrp_df<-read.csv("Data tables/eventsdescrp_df1.csv")%>%
                     bind_rows(.,read.csv("Data tables/eventsdescrp_df2.csv"))%>%
                     bind_rows(.,read.csv("Data tables/eventsdescrp_df3.csv"))%>%
@@ -35,7 +35,13 @@ eventsdescrp_df<-read.csv("Data tables/eventsdescrp_df1.csv")%>%
 
 
 eventsdescrp_df$Description<-as.character(eventsdescrp_df$Description)
-# View(eventsdescrp_df)
+# View(head(eventsdescrp_df))
+
+#All descriptions containing "probation"
+# eventsdescrp_df%>%
+#     filter(str_detect(Description,coll("Probation",T,ignore_case=T)))%>%
+#     distinct(Description)
+
 ```
 
 idea: use group by person id, group by case number, call function 
@@ -55,33 +61,51 @@ Description
 1	SAO Approve Cert Legal Intern Appear For State		
 1	File Order Granting Def Motion To Waive Appearance		
 1-10 of 10 rows
-```{r}
-fail_to_appear<-eventsdescrp_df%>%
-                   mutate(fail_appeared=if_else(str_detect(Description,coll("D6 Failure To Appear",T,ignore_case=T))
-                                                ==T,1,0)) %>%
-                  # mutate(appear=if_else(str_detect(Description,coll("appear",T,ignore_case=T))
-                  #                               ==T,1,0)) %>%
-                  
-                  select(person_id,EventDate,case_num,Description,fail_appeared)
-View(fail_to_appear)
 
-# unique
-# fail_to_appear%>%
-#     select(appear,Description)%>%
-#     filter(appear!=0)%>%
-#     distinct()
-  
+*Idea: to count number of violations of probation, label affidavits as 1, withdrawal of probation warrant as -1, then sum. 
+File Affidavit And Warrant Violation Of Probation (+1), Violation Of Probation Withdrawn (-1), 
+Violation Of Probation Warrant Dismissed (-1)
+*To count number of revocations: File Order Of Revocation Of Probation
+
+```{r}
+#failure to appear and probations
+fta_prob<-eventsdescrp_df%>%
+                   mutate(fail_appeared=if_else(str_detect(
+                                        Description,coll("D6 Failure To Appear",T,ignore_case=T))
+                                        ==T,1,0),
+                          prob_violation=case_when(str_detect(Description,coll(
+                                          "File Affidavit And Warrant Violation Of Probation",
+                                          T,ignore_case=T))~1,
+                                                  
+                                                  str_detect(Description,coll(
+                                                  "Violation Of Probation Withdrawn",T,
+                                                  ignore_case=T))~-1,
+                                                  
+                                                  str_detect(Description,coll(
+                                                  "Violation Of Probation Warrant Dismissed",T,
+                                                  ignore_case=T))~-1,
+                                                  
+                                                  TRUE~0)
+                          ) %>%
+                  select(person_id,EventDate,case_num,Description,fail_appeared, prob_violation)
+# View(fta_prob)
+# View(filter(fta_prob, Description=="File Affidavit And Warrant Violation Of Probation"|
+#               Description=="Violation Of Probation Withdrawn"|
+#               Description=="Violation Of Probation Warrant Dismissed"))
+
+
 
 ```
 
 
 ```{r}
-write.csv(fail_to_appear,"Data tables/fail_to_appear.csv")
+setwd("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism")
+write.csv(fta_prob,"Data tables/fta_prob.csv")
 ```
 
 **CONVICTIONS**
 
-Parsed the XML strings incorrectly when I queried the data from the web API, so I will reparse them here by reading the strings from my hard drive.
+Parsed the XML strings incorrectly when I queried the data from the web API, so I will reparse them here by reading the strings from hard drive.
 ```{r}
 disp_parser<-function(a_disp){
   #a_disp is a list for ONE DISPOSITION
@@ -200,7 +224,6 @@ dispositions_df<-read.csv("C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidiv
 
 GOod example with multiple dates/dispositions: https://www.browardclerk.org/Web2/CaseSearch/Details/?caseid=NjA4MTk4OA%3d%3d-lhwKuEShR5Y%3d&caseNum=12032995TI20A&category=CR
 ```{r}
-
 convictions<-dispositions_df%>%
              mutate(JudgementDate=ymd(JudgementDate),
                     OffenseDate=ymd(OffenseDate),
@@ -245,7 +268,7 @@ testiris<-iris%>%
 
 
 ```{r}
-write.csv(convictions,"C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/convicted_from_disps2.csv")
+write.csv(convictions,"C:/Users/Caroline Wang/OneDrive/Duke/Criminal Recidivism/Data tables/convicted_from_disps.csv")
 
 ```
 
